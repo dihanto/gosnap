@@ -1,0 +1,1 @@
+DROP Table if EXISTS social_medias;

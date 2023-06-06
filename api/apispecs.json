@@ -1,0 +1,1005 @@
+{
+    "openapi":"3.0.2",
+    "info": {
+      "title":"API Gosnap",
+      "version":"1.0"
+    },
+    "servers": [
+      {"url":"http://localhost:1323/"}
+    ],
+    "paths": {
+        "/users/register": {
+            "post": {
+                "tags" : ["Users"],
+                "description": "Register users",
+                "summary" : "Register users",
+                "requestBody" : {
+                    "content" : {
+                        "application/json" :{
+                            "schema" : {
+                                "type" : "object",
+                                "properties": {
+                                    "age" : {
+                                        "type" : "integer"
+                                    },
+                                    "email" :{
+                                        "type" : "string"
+                                    },
+                                    "username" : {
+                                        "type" : "string"
+                                    },
+                                    "password" :  {
+                                        "type" : "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success register user",
+                        "content" : {
+                            "application/json" : {
+                                "schema" : {
+                                    "type": "object",
+                                    "properties": {
+                                        "status" : {
+                                            "type" : "integer"
+                                        },
+                                        "data" : {
+                                            "type" : "object",
+                                            "properties" : {
+                                                "age" : {
+                                                    "type" : "integer"
+                                                },
+                                                "email" :{
+                                                    "type" : "string"
+                                                },
+                                                "username" : {
+                                                    "type" : "string"
+                                                },
+                                                "password" :  {
+                                                    "type" : "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/login": {
+            "post": {
+                "description": "Login User",
+                "summary": "Login User",
+                "tags": ["Users"],
+                "requestBody":{
+                    "content" : {
+                        "application/json":{
+                            "schema" : {
+                                "type" : "object",
+                                "properties": {
+                                    "email" : {
+                                        "type": "string"
+                                    },
+                                    "password" : {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success login user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status":{
+                                            "type": "integer"
+                                        },
+                                        "data" :{
+                                            "type": "object",
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string",
+                                                    "format": "JWT"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }   
+        },
+        "/users": {
+            "put": {
+                "description": "Update user",
+                "summary": "Update user",
+                "parameters": [
+                    {
+                    "name": "userId",
+                    "in": "path",
+                    "description": "User ID"
+                    }
+                ],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "tags": ["Users"],
+                "requestBody":{
+                    "content" :{
+                        "application/json" : {
+                            "schema" : {
+                                "type" : "object",
+                                "properties": {
+                                    "email" : {
+                                        "type": "string"
+                                    },
+                                    "username" : {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success update user",
+                        "content": {
+                            "application/json" :{
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status" : {
+                                            "type": "integer"
+                                        },
+                                        "data" : {
+                                            "type": "object",
+                                            "properties": {
+                                                "id" :{
+                                                    "type": "integer"
+                                                },
+                                                "email":{
+                                                    "type": "string"
+                                                },
+                                                "username" : {
+                                                    "type": "string"
+                                                },
+                                                "age" :{
+                                                    "type": "integer"
+                                                },
+                                                "updatedAt": {
+                                                    "type": "string"
+                                                }
+        
+                                            }
+                                        }
+                                    }
+                                        
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete User",
+                "summary": "Delete User",
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "tags": ["Users"],
+                "responses": {
+                    "200": {
+                        "description": "Success delete user",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status" : {
+                                            "type": "integer"
+                                        },
+                                        "data" :{
+                                            "type": "string"
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/photos": {
+            "post": {
+                "description": "Add photo",
+                "summary": "Add Photo",
+                "tags": ["Photos"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "title" : {
+                                        "type": "string"
+                                    },
+                                    "caption" : {
+                                        "type": "string"
+                                    },
+                                    "photoUrl" : {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success add photo",
+                        "content": {
+                            "application/json" :{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status" :{
+                                            "type": "integer"
+                                        },
+                                        "data" :{
+                                            "type": "object",
+                                            "properties": {
+                                                "id":{
+                                                    "type": "integer"
+                                                },
+                                                "title":{
+                                                    "type": "string"
+                                                },
+                                                "caption" :{
+                                                    "type": "string"
+                                                },
+                                                "photoUrl" :{
+                                                    "type": "string"
+                                                },
+                                                "userId" :{
+                                                    "type": "integer"
+                                                },
+                                                "createdAt" :{
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "description": "Get all photos",
+                "summary": "Get all photos",
+                "tags": ["Photos"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success get all photos",
+                        "content": {
+                            "application/json" :{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status" :{
+                                            "type": "integer"
+                                        },
+                                        "data" :{
+                                            "type": "array",
+                                            "items" :{
+                                                "type": "object",
+                                            "properties": {
+                                                "id":{
+                                                    "type": "integer"
+                                                },
+                                                "title":{
+                                                    "type": "string"
+                                                },
+                                                "caption" :{
+                                                    "type": "string"
+                                                },
+                                                "photoUrl" :{
+                                                    "type": "string"
+                                                },
+                                                "userId" :{
+                                                    "type": "integer"
+                                                },
+                                                "createdAt" :{
+                                                    "type": "string"
+                                                },
+                                                "updatedAt" :{
+                                                    "type": "string"
+                                                },
+                                                "users" : {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "email":{
+                                                            "type": "string"
+                                                        },
+                                                        "username":{
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/photos/:photoId": {
+            "put": {
+                "description": "Update photo",
+                "summary": "Update photo",
+                "tags": ["Photos"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "Photo Id",
+                        "in": "path",
+                        "description": "Photo Id"
+                    }
+                ],
+                "requestBody":{
+                    "content": {
+                        "applicatin/json" :{
+                            "schema" :{
+                                "type": "object",
+                                "properties": {
+                                    "title" :{
+                                        "type": "string"
+                                    },
+                                    "caption" :{
+                                        "type": "string"
+                                    },
+                                    "photoUrl":{
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success update photo",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status":{
+                                            "type": "integer"
+                                        },
+                                        "data":{
+                                            "type": "object",
+                                            "properties": {
+                                                "id":{
+                                                    "type": "integer"
+                                                },
+                                                "title":{
+                                                    "type": "string"
+                                                },
+                                                "caption" :{
+                                                    "type": "string"
+                                                },
+                                                "photoUrl":{
+                                                    "type": "string"
+                                                },
+                                                "userId":{
+                                                    "type": "integer"
+                                                },
+                                                "updatedAt":{
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete photo",
+                "summary": "Delete photo",
+                "tags": ["Photos"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name" : "Photo Id",
+                        "in": "path",
+                        "description": "Photo Id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success delete photo",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status":{
+                                            "type": "integer"
+                                        },
+                                        "message":{
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/comments": {
+            "post": {
+                "description": "Post comment",
+                "summary": "Post comment",
+                "tags": ["Comments"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "message":{
+                                        "type": "string"
+                                    },
+                                    "photoId": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success post comment",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status":{
+                                            "type": "integer"
+                                        },
+                                        "data":{
+                                            "type": "object",
+                                            "properties": {
+                                                "id":{
+                                                    "type": "integer"
+                                                },
+                                                "message":{
+                                                    "type": "string"
+                                                },
+                                                "photoId":{
+                                                    "type": "integer"
+                                                },
+                                                "userId":{
+                                                    "type": "integer"
+                                                },
+                                                "createdAt":{
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "description": "Get all comments",
+                "summary": "Get all comments",
+                "tags": ["Comments"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success get all comments",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "message": {
+                                                        "type": "string"
+                                                    },
+                                                    "photoId": {
+                                                        "type": "integer"
+                                                    },
+                                                    "userId": {
+                                                        "type": "integer"
+                                                    },
+                                                    "updatedAt": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "createdAt": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    },
+                                                    "user": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "format": "email"
+                                                            },
+                                                            "username": {
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    },
+                                                    "photo":{
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "id" :{
+                                                                "type": "integer"
+                                                            },
+                                                            "title": {
+                                                                "type": "string"
+                                                            },
+                                                            "caption":{
+                                                                "type": "string"
+                                                            },
+                                                            "photoUrl":{
+                                                                "type": "string"
+                                                            },
+                                                            "userId":{
+                                                                "type": "integer"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+            }
+        },
+        "/comments/:commentId": {
+            "put": {
+                "description": "Update comment",
+                "summary": "Update comment",
+                "tags": ["Comments"],
+                "parameters": [
+                    {
+                        "name": "Comment Id",
+                        "in": "path",
+                        "description": "Comment Id"
+                    }
+                ],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "message":{
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success update comments",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "id":{
+                                            "type": "integer"
+                                        },
+                                        "title":{
+                                            "type": "string"
+                                        },
+                                        "caption":{
+                                            "type": "string"
+                                        },
+                                        "photoId":{
+                                            "type": "integer"
+                                        },
+                                        "userId":{
+                                            "type": "integer"
+                                        },
+                                        "updatedAt":{
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete comment",
+                "summary": "Delete comment",
+                "tags": ["Comments"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "Comment Id",
+                        "in": "path",
+                        "description": "Comment Id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success delete comment",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status":{
+                                            "type": "integer"
+                                        },
+                                        "message":{
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/socialmedias": {
+            "post": {
+                "description": "Post social media",
+                "summary": "Post social media",
+                "tags": ["Social Medias"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "name":{
+                                        "type": "string"
+                                    },
+                                    "socialMediaUrl":{
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success post social media",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status":{
+                                            "type": "integer"
+                                        },
+                                        "data":{
+                                            "type": "object",
+                                            "properties": {
+                                                "id":{
+                                                    "type": "integer"
+                                                },
+                                                "name":{
+                                                    "type": "string"
+                                                },
+                                                "socialMediaUrl":{
+                                                    "type": "string"
+                                                },
+                                                "userId":{
+                                                    "type": "integer"
+                                                },
+                                                "createdAt":{
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "description": "Get all social media",
+                "summary": "Get all social media",
+                "tags": ["Social Medias"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success get all social media",
+                        "content": {
+                            "application/json" :{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status" :{
+                                            "type": "integer"
+                                        },
+                                        "data" :{
+                                            "type": "object",
+                                            "properties": {
+                                                "socialMedia":{
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id":{
+                                                            "type": "integer"
+                                                        },
+                                                        "name":{
+                                                            "type": "string"
+                                                        },
+                                                        "socialMediaUrl" :{
+                                                            "type": "string"
+                                                        },
+                                                        "userId" :{
+                                                            "type": "integer"
+                                                        },
+                                                        "createdAt" :{
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        },
+                                                        "updatedAt" :{
+                                                            "type": "string",
+                                                            "format": "date-time"
+                                                        },
+                                                        "users" : {
+                                                            "type": "object",
+                                                            "properties": {
+                                                                "email":{
+                                                                    "type": "string"
+                                                                },
+                                                                "username":{
+                                                                    "type": "string"
+                                                                },
+                                                                "profileImageUrl":{
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/socialmedias/:socialMediaId": {
+            "put": {
+                "description": "Update social media",
+                "summary": "Update social media",
+                "tags": ["Social Medias"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "Social Media Id",
+                        "in": "path",
+                        "description": "Social Media Id"
+                    }
+                ],
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "name":{
+                                        "type": "string"
+                                    },
+                                    "socialMediaUrl":{
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success update social media",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status":{
+                                            "type": "integer"
+                                        },
+                                        "data":{
+                                            "type": "object",
+                                            "properties": {
+                                                "id":{
+                                                    "type": "integer"
+                                                },
+                                                "name":{
+                                                    "type": "string"
+                                                },
+                                                "socialMediaUrl":{
+                                                    "type": "string"
+                                                },
+                                                "userId":{
+                                                    "type": "integer"
+                                                },
+                                                "updateAt":{
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete social media",
+                "summary": "Delete social media",
+                "tags": ["Social Medias"],
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name":"Social Media Id",
+                        "in": "path",
+                        "description": "Social Media Id"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success delete social media",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "status" :{
+                                            "type": "integer"
+                                        },
+                                        "message":{
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+          "JWTAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+          }
+        }
+      }
+}
