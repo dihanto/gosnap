@@ -682,10 +682,7 @@
                                         "id":{
                                             "type": "integer"
                                         },
-                                        "title":{
-                                            "type": "string"
-                                        },
-                                        "caption":{
+                                        "message":{
                                             "type": "string"
                                         },
                                         "photoId":{

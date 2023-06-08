@@ -11,46 +11,57 @@ import (
 type PhotoRepositoryImpl struct {
 }
 
-func (repository *PhotoRepositoryImpl) CreatePhoto(ctx context.Context, tx *sql.Tx, photo domain.Photo) (domain.Photo, error) {
+func NewPhotoRepository() PhotoRepository {
+	return &PhotoRepositoryImpl{}
+}
+
+func (repository *PhotoRepositoryImpl) PostPhoto(ctx context.Context, tx *sql.Tx, photo domain.Photo) (domain.Photo, error) {
 	t := time.Now()
 	photo.CreatedAt = int32(t.Unix())
 
-	query := "insert into photos(title, caption, photo_url, created_at) values ($1, $2, $3)"
-	tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoUrl, photo.CreatedAt)
+	query := "insert into photos(title, caption, photo_url,user_id, created_at) values ($1, $2, $3, $4, $5) returning id"
+	row := tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoUrl, photo.UserId, photo.CreatedAt)
+
+	var id int
+	row.Scan(&id)
+	photo.Id = id
 
 	return photo, nil
 
 }
 
-func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context, tx *sql.Tx) ([]domain.Photo, error) {
-	query := "select id, title, caption, photo_url, user_id, created_at, updated_at from photos"
+func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context, tx *sql.Tx) ([]domain.Photo, domain.User, error) {
+	query := "select photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email from photos	join users on photos.user_id = users.id where photos.deleted_at is null;"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
 		panic(err)
 	}
 	defer rows.Close()
-
+	user := domain.User{}
 	var photos []domain.Photo
 	for rows.Next() {
 		photo := domain.Photo{}
-		err := rows.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.User_id, &photo.CreatedAt, &photo.UpdatedAt)
+		err := rows.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.PhotoUrl, &photo.UserId, &photo.CreatedAt, &photo.UpdatedAt, &user.Username, &user.Email)
 		if err != nil {
 			panic(err)
 		}
 		photos = append(photos, photo)
 	}
 
-	return photos, nil
+	return photos, user, nil
 }
 
 func (repository *PhotoRepositoryImpl) UpdatePhoto(ctx context.Context, tx *sql.Tx, photo domain.Photo) (domain.Photo, error) {
 	t := time.Now()
 	photo.UpdatedAt = int32(t.Unix())
 
-	query := "update from photos set title=$1, caption=$2, photo_url=$3, updated_at=$4 where id=$5"
-	row := tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoUrl, photo.UpdatedAt, photo.Id)
+	query := "update photos set title=$1, caption=$2, photo_url=$3, user_id=$4, updated_at=$5 where id=$6 returning created_at"
+	row := tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoUrl, photo.UserId, photo.UpdatedAt, photo.Id)
 
-	row.Scan(&photo.User_id)
+	err := row.Scan(&photo.CreatedAt)
+	if err != nil {
+		panic(err)
+	}
 
 	return photo, nil
 
@@ -60,7 +71,7 @@ func (repository *PhotoRepositoryImpl) DeletePhoto(ctx context.Context, tx *sql.
 	t := time.Now()
 	deleteTime := t.Unix()
 
-	query := "update from photos set deleted_at=$1 where id=$2"
+	query := "update photos set deleted_at=$1 where id=$2"
 	_, err := tx.ExecContext(ctx, query, deleteTime, id)
 	if err != nil {
 		panic(err)

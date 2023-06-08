@@ -44,7 +44,7 @@ func (controller *UserControllerImpl) UserRegister(c echo.Context) error {
 
 	userResponse, err := controller.UserUsecase.UserRegister(c.Request().Context(), request)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]string{
+		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
 		})
 	}
@@ -55,9 +55,7 @@ func (controller *UserControllerImpl) UserRegister(c echo.Context) error {
 	}
 
 	c.Response().Writer.Header().Add("Content-Type", "application/json")
-	c.JSON(http.StatusOK, webResponse)
-
-	return nil
+	return c.JSON(http.StatusOK, webResponse)
 
 }
 
@@ -67,7 +65,7 @@ func (controller *UserControllerImpl) UserLogin(c echo.Context) error {
 
 	res, id, err := controller.UserUsecase.UserLogin(c.Request().Context(), username, password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]string{
+		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
 		})
 	}
@@ -125,7 +123,7 @@ func (controller *UserControllerImpl) UserUpdate(c echo.Context) error {
 
 	userResponse, err := controller.UserUsecase.UserUpdate(c.Request().Context(), request)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]string{
+		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
 		})
 	}
@@ -136,9 +134,7 @@ func (controller *UserControllerImpl) UserUpdate(c echo.Context) error {
 	}
 
 	c.Response().Writer.Header().Add("Content-Type", "application/json")
-	c.JSON(http.StatusOK, webResponse)
-
-	return nil
+	return c.JSON(http.StatusOK, webResponse)
 
 }
 
@@ -147,7 +143,7 @@ func (controller *UserControllerImpl) UserDelete(c echo.Context) error {
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	id, err := helper.GetUserDataFromToken(tokenString)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, map[string]string{
+		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
 		})
 	}
@@ -160,7 +156,6 @@ func (controller *UserControllerImpl) UserDelete(c echo.Context) error {
 	}
 
 	c.Response().Writer.Header().Add("Content-Type", "application/json")
-	c.JSON(http.StatusOK, webResponse)
+	return c.JSON(http.StatusOK, webResponse)
 
-	return nil
 }

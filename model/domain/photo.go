@@ -5,7 +5,7 @@ type Photo struct {
 	Title     string
 	Caption   string
 	PhotoUrl  string
-	User_id   int
+	UserId    int
 	CreatedAt int32
 	UpdatedAt int32
 	DeletedAt int32

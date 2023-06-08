@@ -110,7 +110,7 @@ func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request web.User
 	if err != nil {
 		panic(err)
 	}
-	log.Println(userResponse.UpdatedAt)
+
 	tUpdate := time.Unix(int64(userResponse.UpdatedAt), 0)
 	log.Println(tUpdate)
 	user := web.UserUpdate{

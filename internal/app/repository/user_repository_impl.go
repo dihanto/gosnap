@@ -30,13 +30,13 @@ func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, tx *sql.
 	query := "INSERT INTO users (username, email, password, age, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 	row := tx.QueryRowContext(ctx, query, user.Username, user.Email, password, user.Age, user.CreatedAt)
 
-	var id int64
+	var id int
 	err = row.Scan(&id)
 	if err != nil {
 		return domain.User{}, err
 	}
 
-	user.Id = int(id)
+	user.Id = id
 
 	return user, nil
 }

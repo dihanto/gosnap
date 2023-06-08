@@ -4,8 +4,8 @@ type SocialMedia struct {
 	Id             int
 	Name           string
 	SocialMediaUrl string
-	User_id        int
-	CreatedAt      int8
-	UpdatedAt      int8
-	DeletedAt      int8
+	UserId         int
+	CreatedAt      int32
+	UpdatedAt      int32
+	DeletedAt      int32
 }

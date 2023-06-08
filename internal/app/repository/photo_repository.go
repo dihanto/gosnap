@@ -8,8 +8,8 @@ import (
 )
 
 type PhotoRepository interface {
-	CreatePhoto(ctx context.Context, tx *sql.Tx, photo domain.Photo) (domain.Photo, error)
-	GetPhoto(ctx context.Context, tx *sql.Tx) ([]domain.Photo, error)
+	PostPhoto(ctx context.Context, tx *sql.Tx, photo domain.Photo) (domain.Photo, error)
+	GetPhoto(ctx context.Context, tx *sql.Tx) ([]domain.Photo, domain.User, error)
 	UpdatePhoto(ctx context.Context, tx *sql.Tx, photo domain.Photo) (domain.Photo, error)
 	DeletePhoto(ctx context.Context, tx *sql.Tx, id int) error
 }

@@ -5,7 +5,7 @@ type Comment struct {
 	UserId    int
 	PhotoId   int
 	Message   string
-	CreatedAt int8
-	UpdatedAt int8
-	DeletedAt int8
+	CreatedAt int32
+	UpdatedAt int32
+	DeletedAt int32
 }
