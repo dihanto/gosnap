@@ -50,7 +50,7 @@ func (controller *UserControllerImpl) UserRegister(c echo.Context) error {
 	}
 
 	webResponse := web.WebResponse{
-		Status: http.StatusOK,
+		Status: http.StatusCreated,
 		Data:   userResponse,
 	}
 
@@ -152,7 +152,7 @@ func (controller *UserControllerImpl) UserDelete(c echo.Context) error {
 
 	webResponse := web.WebResponse{
 		Status: http.StatusOK,
-		Data:   "user deleted",
+		Data:   "Your account has been successfully deleted",
 	}
 
 	c.Response().Writer.Header().Add("Content-Type", "application/json")

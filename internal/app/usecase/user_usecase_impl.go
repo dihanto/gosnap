@@ -26,7 +26,10 @@ func NewUserUsecase(userRepository repository.UserRepository, db *sql.DB, valida
 	}
 }
 func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request web.UserRegister) (web.UserRegister, error) {
-
+	err := usecase.Validate.Struct(request)
+	if err != nil {
+		panic(err)
+	}
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		panic(err)
@@ -94,6 +97,10 @@ func (usecase *UserUsecaseImpl) UserLogin(ctx context.Context, username string, 
 }
 
 func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request web.UserUpdate) (web.UserUpdate, error) {
+	err := usecase.Validate.Struct(request)
+	if err != nil {
+		panic(err)
+	}
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		panic(err)

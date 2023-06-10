@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/dihanto/gosnap/model/domain"
@@ -11,6 +12,9 @@ import (
 type SocialMediaRepositoryImpl struct {
 }
 
+func NewSocialMediaRepository() SocialMediaRepository {
+	return &SocialMediaRepositoryImpl{}
+}
 func (repository *SocialMediaRepositoryImpl) PostSocialMedia(ctx context.Context, tx *sql.Tx, socialMedia domain.SocialMedia) (domain.SocialMedia, error) {
 	t := time.Now()
 	socialMedia.CreatedAt = int32(t.Unix())
@@ -45,7 +49,7 @@ func (repository *SocialMediaRepositoryImpl) GetSocialMedia(ctx context.Context,
 		}
 		socialMedias = append(socialMedias, socialMedia)
 	}
-
+	log.Println(socialMedias)
 	return socialMedias, user, nil
 }
 
@@ -53,7 +57,8 @@ func (repository *SocialMediaRepositoryImpl) UpdateSocialMedia(ctx context.Conte
 	t := time.Now()
 	socialMedia.UpdatedAt = int32(t.Unix())
 
-	query := "update social_medias set name=$1 social_media_url=$2 updated_at=$3 where id=$4 returning user_id"
+	log.Println(socialMedia)
+	query := "update social_medias set name=$1, social_media_url=$2, updated_at=$3 where id=$4 returning user_id"
 	row := tx.QueryRowContext(ctx, query, socialMedia.Name, socialMedia.SocialMediaUrl, socialMedia.UpdatedAt, socialMedia.Id)
 
 	err := row.Scan(&socialMedia.UserId)

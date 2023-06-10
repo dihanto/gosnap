@@ -53,7 +53,7 @@ func (controller *CommentControllerImpl) PostComment(c echo.Context) error {
 	}
 
 	webResponse := web.WebResponse{
-		Status: http.StatusOK,
+		Status: http.StatusCreated,
 		Data:   commentResponse,
 	}
 

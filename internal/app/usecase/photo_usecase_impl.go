@@ -26,6 +26,10 @@ func NewPhotoUsecase(repository repository.PhotoRepository, db *sql.DB, validate
 }
 
 func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request web.Photo) (web.Photo, error) {
+	err := usecase.Validate.Struct(request)
+	if err != nil {
+		panic(err)
+	}
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		panic(err)
@@ -121,6 +125,10 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]web.GetPhoto, 
 }
 
 func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request web.Photo) (web.UpdatePhoto, error) {
+	err := usecase.Validate.Struct(request)
+	if err != nil {
+		panic(err)
+	}
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		panic(err)

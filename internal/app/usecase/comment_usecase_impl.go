@@ -25,6 +25,10 @@ func NewCommentUsecase(repository repository.CommentRepository, db *sql.DB, vali
 	}
 }
 func (usecase *CommentUsecaseImpl) PostComment(ctx context.Context, request web.PostComment) (web.PostComment, error) {
+	err := usecase.Validate.Struct(request)
+	if err != nil {
+		panic(err)
+	}
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		panic(err)
@@ -119,6 +123,10 @@ func (usecase *CommentUsecaseImpl) GetComment(ctx context.Context) ([]web.GetCom
 }
 
 func (usecase *CommentUsecaseImpl) UpdateComment(ctx context.Context, request web.UpdateComment) (web.UpdateComment, error) {
+	err := usecase.Validate.Struct(request)
+	if err != nil {
+		panic(err)
+	}
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		panic(err)

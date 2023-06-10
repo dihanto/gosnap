@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/dihanto/gosnap/internal/app/config"
 	"github.com/dihanto/gosnap/internal/app/controller"
+	"github.com/dihanto/gosnap/internal/app/helper"
 	"github.com/dihanto/gosnap/internal/app/middleware"
 	"github.com/dihanto/gosnap/internal/app/repository"
 	"github.com/dihanto/gosnap/internal/app/usecase"
@@ -15,6 +16,8 @@ func NewRouter() *echo.Echo {
 
 	db := config.NewDb()
 	validate := validator.New()
+	validate.RegisterValidation("email_uniq", helper.ValidateEmailUniq)
+	validate.RegisterValidation("username_uniq", helper.ValidateUsernameUniq)
 
 	userRepository := repository.NewUserRepository()
 	userUsecase := usecase.NewUserUsecase(userRepository, db, validate)
@@ -27,6 +30,10 @@ func NewRouter() *echo.Echo {
 	commentRepository := repository.NewCommentRepository()
 	commentUsecase := usecase.NewCommentUsecase(commentRepository, db, validate)
 	commentController := controller.NewCommentController(commentUsecase)
+
+	socialMediaRepository := repository.NewSocialMediaRepository()
+	socialMediaUsecase := usecase.NewSocialMediaUsecase(socialMediaRepository, db, validate)
+	socialMediaController := controller.NewSocialMediaController(socialMediaUsecase)
 
 	e.POST("/users/register", userController.UserRegister)
 	e.POST("/users/login", userController.UserLogin)
@@ -42,6 +49,11 @@ func NewRouter() *echo.Echo {
 	e.GET("/comments", commentController.GetComment, middleware.Auth)
 	e.PUT("/comments/:commentId", commentController.UpdateComment, middleware.Auth)
 	e.DELETE("/comments/:commentId", commentController.DeleteComment, middleware.Auth)
+
+	e.POST("/socialmedias", socialMediaController.PostSocialMedia, middleware.Auth)
+	e.GET("/socialmedias", socialMediaController.GetSocialMedia, middleware.Auth)
+	e.PUT("/socialmedias/:socialMediaId", socialMediaController.UpdateSocialMedia, middleware.Auth)
+	e.DELETE("/socialmedias/:socialMediaId", socialMediaController.DeleteSocialMedia, middleware.Auth)
 
 	return e
 }

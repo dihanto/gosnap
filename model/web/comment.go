@@ -6,7 +6,7 @@ type PostComment struct {
 	Id        int       `json:"id"`
 	UserId    int       `json:"userId"`
 	PhotoId   int       `json:"photoId"`
-	Message   string    `json:"message"`
+	Message   string    `validate:"required" json:"message"`
 	CreatedAt time.Time ` json:"createdAt"`
 }
 
@@ -14,7 +14,7 @@ type UpdateComment struct {
 	Id        int       `json:"id"`
 	UserId    int       `json:"userId"`
 	PhotoId   int       `json:"photoId"`
-	Message   string    `json:"message"`
+	Message   string    `validate:"required" json:"message"`
 	UpdatedAt time.Time ` json:"updatedAt"`
 }
 

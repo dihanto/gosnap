@@ -11,18 +11,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type PhotoControllerImpl struct {
-	Usecase usecase.PhotoUsecase
+type SocialMediaControllerImpl struct {
+	Usecase usecase.SocialMediaUsecase
 }
 
-func NewPhotoController(usecase usecase.PhotoUsecase) PhotoController {
-	return &PhotoControllerImpl{
+func NewSocialMediaController(usecase usecase.SocialMediaUsecase) SocialMediaController {
+	return &SocialMediaControllerImpl{
 		Usecase: usecase,
 	}
 }
 
-func (controller *PhotoControllerImpl) PostPhoto(c echo.Context) error {
-
+func (controller *SocialMediaControllerImpl) PostSocialMedia(c echo.Context) error {
+	name := c.FormValue("name")
+	socialMediaUrl := c.FormValue("socialMediaUrl")
 	authHeader := c.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	userId, err := helper.GetUserDataFromToken(tokenString)
@@ -32,35 +33,30 @@ func (controller *PhotoControllerImpl) PostPhoto(c echo.Context) error {
 		})
 	}
 
-	title := c.FormValue("title")
-	caption := c.FormValue("caption")
-	photoUrl := c.FormValue("photoUrl")
-
-	request := web.Photo{
-		Title:    title,
-		Caption:  caption,
-		PhotoUrl: photoUrl,
-		UserId:   userId,
+	request := web.PostSocialMedia{
+		Name:           name,
+		SocialMediaUrl: socialMediaUrl,
+		UserId:         userId,
 	}
-	photoResponse, err := controller.Usecase.PostPhoto(c.Request().Context(), request)
+
+	socialMediaResponse, err := controller.Usecase.PostSocialMedia(c.Request().Context(), request)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
 		})
 	}
-
 	webResponse := web.WebResponse{
 		Status: http.StatusCreated,
-		Data:   photoResponse,
+		Data:   socialMediaResponse,
 	}
 
 	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
+
 }
 
-func (controller *PhotoControllerImpl) GetPhoto(c echo.Context) error {
-
-	photoResponse, err := controller.Usecase.GetPhoto(c.Request().Context())
+func (controller *SocialMediaControllerImpl) GetSocialMedia(c echo.Context) error {
+	socialMediaResponse, err := controller.Usecase.GetSocialMedia(c.Request().Context())
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
@@ -69,41 +65,56 @@ func (controller *PhotoControllerImpl) GetPhoto(c echo.Context) error {
 
 	webResponse := web.WebResponse{
 		Status: http.StatusOK,
-		Data:   photoResponse,
+		Data:   socialMediaResponse,
 	}
+
 	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *PhotoControllerImpl) UpdatePhoto(c echo.Context) error {
+func (controller *SocialMediaControllerImpl) UpdateSocialMedia(c echo.Context) error {
 
-	authHeader := c.Request().Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	userId, err := helper.GetUserDataFromToken(tokenString)
+	idString := c.Param("socialMediaId")
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": err.Error(),
+		})
+	}
+	name := c.FormValue("name")
+	socialMediaUrl := c.FormValue("socialMediaUrl")
+
+	request := web.UpdateSocialMedia{
+		Id:             id,
+		Name:           name,
+		SocialMediaUrl: socialMediaUrl,
+	}
+
+	socialMediaResponse, err := controller.Usecase.UpdateSocialMedia(c.Request().Context(), request)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"message": err.Error(),
+		})
+	}
+	webResponse := web.WebResponse{
+		Status: http.StatusOK,
+		Data:   socialMediaResponse,
+	}
+
+	c.Response().Writer.Header().Add("Content-Type", "application/json")
+	return c.JSON(http.StatusOK, webResponse)
+}
+
+func (controller *SocialMediaControllerImpl) DeleteSocialMedia(c echo.Context) error {
+	idString := c.Param("socialMediaId")
+	id, err := strconv.Atoi(idString)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
 		})
 	}
 
-	id, err := strconv.Atoi(c.Param("photoId"))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
-	}
-	title := c.FormValue("title")
-	caption := c.FormValue("caption")
-	photoUrl := c.FormValue("photoUrl")
-
-	request := web.Photo{
-		Title:    title,
-		Caption:  caption,
-		PhotoUrl: photoUrl,
-		Id:       id,
-		UserId:   userId,
-	}
-	photoResponse, err := controller.Usecase.UpdatePhoto(c.Request().Context(), request)
+	err = controller.Usecase.DeleteSocialMedia(c.Request().Context(), id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"message": err.Error(),
@@ -112,32 +123,8 @@ func (controller *PhotoControllerImpl) UpdatePhoto(c echo.Context) error {
 
 	webResponse := web.WebResponse{
 		Status: http.StatusOK,
-		Data:   photoResponse,
+		Data:   "Your social media has been succesfully deleted",
 	}
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
-	return c.JSON(http.StatusOK, webResponse)
-}
-
-func (controller *PhotoControllerImpl) DeletePhoto(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("photoId"))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
-	}
-
-	err = controller.Usecase.DeletePhoto(c.Request().Context(), id)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
-	}
-
-	webResponse := web.WebResponse{
-		Status: http.StatusOK,
-		Data:   "Your photo has been successfully deleted",
-	}
-
 	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
 }

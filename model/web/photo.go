@@ -4,17 +4,17 @@ import "time"
 
 type Photo struct {
 	Id        int       `json:"id"`
-	Title     string    `json:"title"`
+	Title     string    `validate:"required" json:"title"`
 	Caption   string    `json:"caption"`
-	PhotoUrl  string    `json:"photoUrl"`
+	PhotoUrl  string    `validate:"required" json:"photoUrl"`
 	UserId    int       `json:"userId"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 type UpdatePhoto struct {
 	Id        int       `json:"id"`
-	Title     string    `json:"title"`
+	Title     string    `validate:"required" json:"title"`
 	Caption   string    `json:"caption"`
-	PhotoUrl  string    `json:"photoUrl"`
+	PhotoUrl  string    `validate:"required" json:"photoUrl"`
 	UserId    int       `json:"userId"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
