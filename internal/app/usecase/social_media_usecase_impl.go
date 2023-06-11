@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -28,12 +29,22 @@ func NewSocialMediaUsecase(repository repository.SocialMediaRepository, db *sql.
 func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(ctx context.Context, request web.PostSocialMedia) (web.PostSocialMedia, error) {
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		panic(err)
+		return web.PostSocialMedia{}, err
 	}
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		panic(err)
+		return web.PostSocialMedia{}, err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(r)
+		}
+	}()
 
 	socialMedia := domain.SocialMedia{
 		Name:           request.Name,
@@ -43,7 +54,16 @@ func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(ctx context.Context, requ
 
 	socialMedia, err = usecase.Repository.PostSocialMedia(ctx, tx, socialMedia)
 	if err != nil {
-		panic(err)
+		return web.PostSocialMedia{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
+		}
+		return web.PostSocialMedia{}, err
 	}
 
 	socialMediaResponse := web.PostSocialMedia{
@@ -54,32 +74,27 @@ func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(ctx context.Context, requ
 		CreatedAt:      time.Unix(int64(socialMedia.CreatedAt), 0),
 	}
 
-	errr := recover()
-	if errr != nil {
-		err = tx.Rollback()
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		err = tx.Commit()
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	return socialMediaResponse, nil
-
 }
 
 func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(ctx context.Context) ([]web.GetSocialMedia, error) {
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(r)
+		}
+	}()
 
 	socialMedias, user, err := usecase.Repository.GetSocialMedia(ctx, tx)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	userWeb := web.UserSocialMedia{
 		Id:       user.Id,
@@ -88,7 +103,7 @@ func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(ctx context.Context) ([]we
 
 	var socialMediasResponse []web.GetSocialMedia
 	for _, socialMedia := range socialMedias {
-		socialMedia := web.GetSocialMedia{
+		socialMediaResponse := web.GetSocialMedia{
 			Id:             socialMedia.Id,
 			Name:           socialMedia.Name,
 			SocialMediaUrl: socialMedia.SocialMediaUrl,
@@ -97,20 +112,16 @@ func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(ctx context.Context) ([]we
 			UpdatedAt:      time.Unix(int64(socialMedia.UpdatedAt), 0),
 			User:           userWeb,
 		}
-		socialMediasResponse = append(socialMediasResponse, socialMedia)
+		socialMediasResponse = append(socialMediasResponse, socialMediaResponse)
 	}
 
-	errr := recover()
-	if errr != nil {
-		err = tx.Rollback()
-		if err != nil {
-			panic(err)
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-	} else {
-		err = tx.Commit()
-		if err != nil {
-			panic(err)
-		}
+		return nil, err
 	}
 
 	return socialMediasResponse, nil
@@ -119,12 +130,22 @@ func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(ctx context.Context) ([]we
 func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(ctx context.Context, request web.UpdateSocialMedia) (web.UpdateSocialMedia, error) {
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		panic(err)
+		return web.UpdateSocialMedia{}, err
 	}
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		panic(err)
+		return web.UpdateSocialMedia{}, err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(r)
+		}
+	}()
 
 	socialMedia := domain.SocialMedia{
 		Id:             request.Id,
@@ -134,7 +155,7 @@ func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(ctx context.Context, re
 
 	socialMedia, err = usecase.Repository.UpdateSocialMedia(ctx, tx, socialMedia)
 	if err != nil {
-		panic(err)
+		return web.UpdateSocialMedia{}, err
 	}
 
 	socialMediaResponse := web.UpdateSocialMedia{
@@ -145,46 +166,47 @@ func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(ctx context.Context, re
 		UpdatedAt:      time.Unix(int64(socialMedia.UpdatedAt), 0),
 	}
 
-	errr := recover()
-	if errr != nil {
-		err = tx.Rollback()
-		if err != nil {
-			panic(err)
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-	} else {
-		err = tx.Commit()
-		if err != nil {
-			panic(err)
-		}
+		return web.UpdateSocialMedia{}, err
 	}
 
 	return socialMediaResponse, nil
 }
 
 func (usecase *SocialMediaUsecaseImpl) DeleteSocialMedia(ctx context.Context, id int) error {
+	// Begin transacion
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		panic(err)
+		return err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(r)
+		}
+	}()
 
 	err = usecase.Repository.DeleteSocialMedia(ctx, tx, id)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	errr := recover()
-	if errr != nil {
-		err = tx.Rollback()
-		if err != nil {
-			panic(err)
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-	} else {
-		err = tx.Commit()
-		if err != nil {
-			panic(err)
-		}
+		return err
 	}
 
 	return nil
-
 }

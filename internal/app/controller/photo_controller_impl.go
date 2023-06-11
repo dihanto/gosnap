@@ -22,14 +22,11 @@ func NewPhotoController(usecase usecase.PhotoUsecase) PhotoController {
 }
 
 func (controller *PhotoControllerImpl) PostPhoto(c echo.Context) error {
-
 	authHeader := c.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	userId, err := helper.GetUserDataFromToken(tokenString)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	title := c.FormValue("title")
@@ -42,11 +39,10 @@ func (controller *PhotoControllerImpl) PostPhoto(c echo.Context) error {
 		PhotoUrl: photoUrl,
 		UserId:   userId,
 	}
+
 	photoResponse, err := controller.Usecase.PostPhoto(c.Request().Context(), request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	webResponse := web.WebResponse{
@@ -54,44 +50,36 @@ func (controller *PhotoControllerImpl) PostPhoto(c echo.Context) error {
 		Data:   photoResponse,
 	}
 
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
 }
 
 func (controller *PhotoControllerImpl) GetPhoto(c echo.Context) error {
-
 	photoResponse, err := controller.Usecase.GetPhoto(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	webResponse := web.WebResponse{
 		Status: http.StatusOK,
 		Data:   photoResponse,
 	}
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
+
 	return c.JSON(http.StatusOK, webResponse)
 }
 
 func (controller *PhotoControllerImpl) UpdatePhoto(c echo.Context) error {
-
 	authHeader := c.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	userId, err := helper.GetUserDataFromToken(tokenString)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	id, err := strconv.Atoi(c.Param("photoId"))
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
 	title := c.FormValue("title")
 	caption := c.FormValue("caption")
 	photoUrl := c.FormValue("photoUrl")
@@ -103,34 +91,29 @@ func (controller *PhotoControllerImpl) UpdatePhoto(c echo.Context) error {
 		Id:       id,
 		UserId:   userId,
 	}
+
 	photoResponse, err := controller.Usecase.UpdatePhoto(c.Request().Context(), request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	webResponse := web.WebResponse{
 		Status: http.StatusOK,
 		Data:   photoResponse,
 	}
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
+
 	return c.JSON(http.StatusOK, webResponse)
 }
 
 func (controller *PhotoControllerImpl) DeletePhoto(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("photoId"))
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	err = controller.Usecase.DeletePhoto(c.Request().Context(), id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	webResponse := web.WebResponse{
@@ -138,6 +121,5 @@ func (controller *PhotoControllerImpl) DeletePhoto(c echo.Context) error {
 		Data:   "Your photo has been successfully deleted",
 	}
 
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
 }

@@ -30,9 +30,7 @@ func (controller *UserControllerImpl) UserRegister(c echo.Context) error {
 	ageString := c.FormValue("age")
 	age, err := strconv.Atoi(ageString)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid age value")
 	}
 
 	request := web.UserRegister{
@@ -44,9 +42,7 @@ func (controller *UserControllerImpl) UserRegister(c echo.Context) error {
 
 	userResponse, err := controller.UserUsecase.UserRegister(c.Request().Context(), request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return err
 	}
 
 	webResponse := web.WebResponse{
@@ -54,9 +50,7 @@ func (controller *UserControllerImpl) UserRegister(c echo.Context) error {
 		Data:   userResponse,
 	}
 
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
-
 }
 
 func (controller *UserControllerImpl) UserLogin(c echo.Context) error {
@@ -65,9 +59,7 @@ func (controller *UserControllerImpl) UserLogin(c echo.Context) error {
 
 	res, id, err := controller.UserUsecase.UserLogin(c.Request().Context(), username, password)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if !res {
@@ -83,9 +75,7 @@ func (controller *UserControllerImpl) UserLogin(c echo.Context) error {
 
 	t, err := token.SignedString([]byte("snapsecret"))
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	webResponse := web.WebResponse{
@@ -101,9 +91,7 @@ func (controller *UserControllerImpl) UserUpdate(c echo.Context) error {
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	id, err := helper.GetUserDataFromToken(tokenString)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	username := c.FormValue("username")
@@ -111,7 +99,7 @@ func (controller *UserControllerImpl) UserUpdate(c echo.Context) error {
 	ageString := c.FormValue("age")
 	age, err := strconv.Atoi(ageString)
 	if err != nil {
-		panic(err)
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid age value")
 	}
 
 	request := web.UserUpdate{
@@ -123,9 +111,7 @@ func (controller *UserControllerImpl) UserUpdate(c echo.Context) error {
 
 	userResponse, err := controller.UserUsecase.UserUpdate(c.Request().Context(), request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	webResponse := web.WebResponse{
@@ -133,9 +119,7 @@ func (controller *UserControllerImpl) UserUpdate(c echo.Context) error {
 		Data:   userResponse,
 	}
 
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
-
 }
 
 func (controller *UserControllerImpl) UserDelete(c echo.Context) error {
@@ -143,19 +127,18 @@ func (controller *UserControllerImpl) UserDelete(c echo.Context) error {
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	id, err := helper.GetUserDataFromToken(tokenString)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	controller.UserUsecase.UserDelete(c.Request().Context(), id)
+	err = controller.UserUsecase.UserDelete(c.Request().Context(), id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
 
 	webResponse := web.WebResponse{
 		Status: http.StatusOK,
 		Data:   "Your account has been successfully deleted",
 	}
 
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
-
 }

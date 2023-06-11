@@ -28,9 +28,7 @@ func (controller *SocialMediaControllerImpl) PostSocialMedia(c echo.Context) err
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	userId, err := helper.GetUserDataFromToken(tokenString)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	request := web.PostSocialMedia{
@@ -41,26 +39,21 @@ func (controller *SocialMediaControllerImpl) PostSocialMedia(c echo.Context) err
 
 	socialMediaResponse, err := controller.Usecase.PostSocialMedia(c.Request().Context(), request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
 	webResponse := web.WebResponse{
 		Status: http.StatusCreated,
 		Data:   socialMediaResponse,
 	}
 
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
-
 }
 
 func (controller *SocialMediaControllerImpl) GetSocialMedia(c echo.Context) error {
 	socialMediaResponse, err := controller.Usecase.GetSocialMedia(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	webResponse := web.WebResponse{
@@ -68,18 +61,14 @@ func (controller *SocialMediaControllerImpl) GetSocialMedia(c echo.Context) erro
 		Data:   socialMediaResponse,
 	}
 
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
 }
 
 func (controller *SocialMediaControllerImpl) UpdateSocialMedia(c echo.Context) error {
-
 	idString := c.Param("socialMediaId")
 	id, err := strconv.Atoi(idString)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	name := c.FormValue("name")
 	socialMediaUrl := c.FormValue("socialMediaUrl")
@@ -92,16 +81,14 @@ func (controller *SocialMediaControllerImpl) UpdateSocialMedia(c echo.Context) e
 
 	socialMediaResponse, err := controller.Usecase.UpdateSocialMedia(c.Request().Context(), request)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
 	webResponse := web.WebResponse{
 		Status: http.StatusOK,
 		Data:   socialMediaResponse,
 	}
 
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
 	return c.JSON(http.StatusOK, webResponse)
 }
 
@@ -109,22 +96,18 @@ func (controller *SocialMediaControllerImpl) DeleteSocialMedia(c echo.Context) e
 	idString := c.Param("socialMediaId")
 	id, err := strconv.Atoi(idString)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	err = controller.Usecase.DeleteSocialMedia(c.Request().Context(), id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"message": err.Error(),
-		})
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	webResponse := web.WebResponse{
 		Status: http.StatusOK,
-		Data:   "Your social media has been succesfully deleted",
+		Data:   "Your social media has been successfully deleted",
 	}
-	c.Response().Writer.Header().Add("Content-Type", "application/json")
+
 	return c.JSON(http.StatusOK, webResponse)
 }

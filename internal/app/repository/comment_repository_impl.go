@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/dihanto/gosnap/model/domain"
@@ -23,17 +24,17 @@ func (repository *CommentRepositoryImpl) PostComment(ctx context.Context, tx *sq
 
 	err := row.Scan(&comment.Id)
 	if err != nil {
-		panic(err)
+		return domain.Comment{}, err
 	}
 
 	return comment, nil
 }
 
 func (repository *CommentRepositoryImpl) GetComment(ctx context.Context, tx *sql.Tx) ([]domain.Comment, domain.User, domain.Photo, error) {
-	query := "select comments.id, comments.message, comments.photo_id, comments.user_id, comments.created_at, comments.updated_at, users.id, users.email, users.username, photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id	from comments	join photos on comments.photo_id = photos.id	join users on comments.user_id = users.id;"
+	query := "select comments.id, comments.message, comments.photo_id, comments.user_id, comments.created_at, comments.updated_at, users.id, users.email, users.username, photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id	from comments	join photos on comments.photo_id = photos.id	join users on comments.user_id = users.id where comments.deleted_at is null;"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
-		panic(err)
+		return []domain.Comment{}, domain.User{}, domain.Photo{}, err
 	}
 	defer rows.Close()
 
@@ -46,7 +47,7 @@ func (repository *CommentRepositoryImpl) GetComment(ctx context.Context, tx *sql
 
 		err = rows.Scan(&comment.Id, &comment.Message, &comment.PhotoId, &comment.UserId, &comment.CreatedAt, &comment.UpdatedAt, &user.Id, &user.Email, &user.Username, &photo.Id, &photo.Title, &photo.Caption, &photo.PhotoUrl, &photo.UserId)
 		if err != nil {
-			panic(err)
+			return []domain.Comment{}, domain.User{}, domain.Photo{}, err
 		}
 		comments = append(comments, comment)
 	}
@@ -62,7 +63,7 @@ func (repository *CommentRepositoryImpl) UpdateComment(ctx context.Context, tx *
 
 	err := row.Scan(&comment.PhotoId)
 	if err != nil {
-		panic(err)
+		return domain.Comment{}, err
 	}
 
 	return comment, nil
@@ -73,9 +74,16 @@ func (repository *CommentRepositoryImpl) DeleteComment(ctx context.Context, tx *
 	deleteTime := t.Unix()
 
 	query := "update comments set deleted_at = $1 where id = $2"
-	_, err := tx.ExecContext(ctx, query, deleteTime, id)
+	result, err := tx.ExecContext(ctx, query, deleteTime, id)
 	if err != nil {
-		panic(err)
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return errors.New("comment not found")
 	}
 
 	return nil

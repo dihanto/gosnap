@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/dihanto/gosnap/internal/app/config"
 	"github.com/dihanto/gosnap/internal/app/controller"
+	"github.com/dihanto/gosnap/internal/app/exception"
 	"github.com/dihanto/gosnap/internal/app/helper"
 	"github.com/dihanto/gosnap/internal/app/middleware"
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -13,6 +14,8 @@ import (
 
 func NewRouter() *echo.Echo {
 	e := echo.New()
+
+	e.HTTPErrorHandler = exception.ErrorHandler
 
 	db := config.NewDb()
 	validate := validator.New()

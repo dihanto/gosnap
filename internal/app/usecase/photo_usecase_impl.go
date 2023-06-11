@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -28,12 +29,22 @@ func NewPhotoUsecase(repository repository.PhotoRepository, db *sql.DB, validate
 func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request web.Photo) (web.Photo, error) {
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		panic(err)
+		return web.Photo{}, err
 	}
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		panic(err)
+		return web.Photo{}, err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(r)
+		}
+	}()
 
 	photo := domain.Photo{
 		Title:    request.Title,
@@ -44,7 +55,16 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request web.Phot
 
 	photo, err = usecase.Repository.PostPhoto(ctx, tx, photo)
 	if err != nil {
-		panic(err)
+		return web.Photo{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
+		}
+		return web.Photo{}, err
 	}
 
 	tCreate := time.Unix(int64(photo.CreatedAt), 0)
@@ -58,33 +78,29 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request web.Phot
 		CreatedAt: tCreate,
 	}
 
-	errr := recover()
-	if errr != nil {
-		err = tx.Rollback()
-		if err != nil {
-			panic(err)
-		}
-
-	} else {
-		err = tx.Commit()
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	return photoResponse, nil
 }
 
 func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]web.GetPhoto, error) {
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(r)
+		}
+	}()
 
 	photos, user, err := usecase.Repository.GetPhoto(ctx, tx)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
+
 	userWeb := web.User{
 		Username: user.Username,
 		Email:    user.Email,
@@ -107,18 +123,13 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]web.GetPhoto, 
 		photoResponse = append(photoResponse, photo)
 	}
 
-	errr := recover()
-	if errr != nil {
-		err = tx.Rollback()
-		if err != nil {
-			panic(err)
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-
-	} else {
-		err = tx.Commit()
-		if err != nil {
-			panic(err)
-		}
+		return nil, err
 	}
 
 	return photoResponse, nil
@@ -127,27 +138,35 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]web.GetPhoto, 
 func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request web.Photo) (web.UpdatePhoto, error) {
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		panic(err)
-	}
-	tx, err := usecase.DB.Begin()
-	if err != nil {
-		panic(err)
+		return web.UpdatePhoto{}, err
 	}
 
+	tx, err := usecase.DB.Begin()
+	if err != nil {
+		return web.UpdatePhoto{}, err
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(r)
+		}
+	}()
+
 	photo := domain.Photo{
+		Id:       request.Id,
 		Title:    request.Title,
-		Caption:  request.Title,
+		Caption:  request.Caption,
 		PhotoUrl: request.PhotoUrl,
 		UserId:   request.UserId,
-		Id:       request.Id,
 	}
 
 	photo, err = usecase.Repository.UpdatePhoto(ctx, tx, photo)
 	if err != nil {
-		panic(err)
+		return web.UpdatePhoto{}, err
 	}
-
-	timeResponse := time.Unix(int64(photo.UpdatedAt), 0)
 
 	photoResponse := web.UpdatePhoto{
 		Id:        photo.Id,
@@ -155,49 +174,49 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request web.Ph
 		Caption:   photo.Caption,
 		PhotoUrl:  photo.PhotoUrl,
 		UserId:    photo.UserId,
-		UpdatedAt: timeResponse,
+		UpdatedAt: time.Unix(int64(photo.UpdatedAt), 0),
 		CreatedAt: time.Unix(int64(photo.CreatedAt), 0),
 	}
 
-	errr := recover()
-	if errr != nil {
-		err = tx.Rollback()
-		if err != nil {
-			panic(err)
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-	} else {
-		err = tx.Commit()
-		if err != nil {
-			panic(err)
-		}
+		return web.UpdatePhoto{}, err
 	}
 
 	return photoResponse, nil
-
 }
 
 func (usecase *PhotoUsecaseImpl) DeletePhoto(ctx context.Context, id int) error {
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		panic(err)
+		return err
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(r)
+		}
+	}()
 
 	err = usecase.Repository.DeletePhoto(ctx, tx, id)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	errr := recover()
-	if errr != nil {
-		err = tx.Rollback()
-		if err != nil {
-			panic(err)
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-	} else {
-		err = tx.Commit()
-		if err != nil {
-			panic(err)
-		}
+		return err
 	}
 
 	return nil
