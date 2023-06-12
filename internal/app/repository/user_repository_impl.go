@@ -19,8 +19,7 @@ func NewUserRepository() UserRepository {
 
 func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error) {
 
-	t := time.Now()
-	user.CreatedAt = int32(t.Unix())
+	user.CreatedAt = int32(time.Now().Unix())
 
 	password, err := helper.HashPassword(user.Password)
 	if err != nil {

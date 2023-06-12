@@ -16,6 +16,7 @@ type CommentUsecaseImpl struct {
 	Repository repository.CommentRepository
 	DB         *sql.DB
 	Validate   *validator.Validate
+	Timeout    int
 }
 
 func NewCommentUsecase(repository repository.CommentRepository, db *sql.DB, validate *validator.Validate) CommentUsecase {
