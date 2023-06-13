@@ -7,25 +7,25 @@ import (
 )
 
 type PostComment struct {
-	Id        uuid.UUID `json:"id"`
+	Id        int       `json:"id"`
 	UserId    uuid.UUID `json:"userId"`
-	PhotoId   uuid.UUID `json:"photoId"`
+	PhotoId   int       `json:"photoId"`
 	Message   string    `json:"message"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 type UpdateComment struct {
-	Id        uuid.UUID `json:"id"`
+	Id        int       `json:"id"`
 	UserId    uuid.UUID `json:"userId"`
-	PhotoId   uuid.UUID `json:"photoId"`
+	PhotoId   int       `json:"photoId"`
 	Message   string    `json:"message"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type GetComment struct {
-	Id        uuid.UUID `json:"id"`
+	Id        int       `json:"id"`
 	Message   string    `json:"message"`
 	UserId    uuid.UUID `json:"userId"`
-	PhotoId   uuid.UUID `json:"photoId"`
+	PhotoId   int       `json:"photoId"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	User      UserComment
@@ -38,7 +38,7 @@ type UserComment struct {
 	Username string    `json:"username"`
 }
 type PhotoComment struct {
-	Id       uuid.UUID `json:"id"`
+	Id       int       `json:"id"`
 	Title    string    `json:"title"`
 	Caption  string    `json:"caption"`
 	PhotoUrl string    `json:"photoUrl"`

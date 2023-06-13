@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/dihanto/gosnap/model/domain"
-	"github.com/google/uuid"
 )
 
 type CommentRepositoryImpl struct {
@@ -20,8 +19,9 @@ func (repository *CommentRepositoryImpl) PostComment(ctx context.Context, tx *sq
 
 	comment.CreatedAt = int32(time.Now().Unix())
 
-	query := "INSERT INTO comments (id, message, photo_id, user_id, created_at) VALUES ($1, $2, $3, $4, $5)"
-	_, err := tx.ExecContext(ctx, query, comment.Id, comment.Message, comment.PhotoId, comment.UserId, comment.CreatedAt)
+	query := "INSERT INTO comments (message, photo_id, user_id, created_at) VALUES ($1, $2, $3, $4) RETURNING id"
+	row := tx.QueryRowContext(ctx, query, comment.Message, comment.PhotoId, comment.UserId, comment.CreatedAt)
+	err := row.Scan(&comment.Id)
 	if err != nil {
 		return domain.Comment{}, err
 	}
@@ -73,7 +73,7 @@ func (repository *CommentRepositoryImpl) UpdateComment(ctx context.Context, tx *
 	return comment, nil
 }
 
-func (repository *CommentRepositoryImpl) DeleteComment(ctx context.Context, tx *sql.Tx, id uuid.UUID) error {
+func (repository *CommentRepositoryImpl) DeleteComment(ctx context.Context, tx *sql.Tx, id int) error {
 
 	deleteTime := int32(time.Now().Unix())
 

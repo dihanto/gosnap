@@ -11,7 +11,6 @@ import (
 	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 )
 
 type CommentUsecaseImpl struct {
@@ -57,7 +56,6 @@ func (usecase *CommentUsecaseImpl) PostComment(c context.Context, request reques
 		PhotoId: request.PhotoId,
 		UserId:  request.UserId,
 	}
-	comment.Id = uuid.New()
 
 	comment, err = usecase.Repository.PostComment(ctx, tx, comment)
 	if err != nil {
@@ -212,7 +210,7 @@ func (usecase *CommentUsecaseImpl) UpdateComment(c context.Context, request requ
 	return commentResponse, nil
 }
 
-func (usecase *CommentUsecaseImpl) DeleteComment(c context.Context, id uuid.UUID) error {
+func (usecase *CommentUsecaseImpl) DeleteComment(c context.Context, id int) error {
 	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 

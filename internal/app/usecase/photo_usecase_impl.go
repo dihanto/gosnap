@@ -11,7 +11,6 @@ import (
 	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 )
 
 type PhotoUsecaseImpl struct {
@@ -59,7 +58,6 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(c context.Context, request request.Ph
 		PhotoUrl: request.PhotoUrl,
 		UserId:   request.UserId,
 	}
-	photo.Id = uuid.New()
 
 	photo, err = usecase.Repository.PostPhoto(ctx, tx, photo)
 	if err != nil {
@@ -212,7 +210,7 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(c context.Context, request request.
 	return photoResponse, nil
 }
 
-func (usecase *PhotoUsecaseImpl) DeletePhoto(c context.Context, id uuid.UUID) error {
+func (usecase *PhotoUsecaseImpl) DeletePhoto(c context.Context, id int) error {
 	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 

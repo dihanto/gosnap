@@ -7,7 +7,7 @@ import (
 )
 
 type PostPhoto struct {
-	Id        uuid.UUID `json:"id"`
+	Id        int       `json:"id"`
 	Title     string    `json:"title"`
 	Caption   string    `json:"caption"`
 	PhotoUrl  string    `json:"photoUrl"`
@@ -16,7 +16,7 @@ type PostPhoto struct {
 }
 
 type UpdatePhoto struct {
-	Id        uuid.UUID `json:"id"`
+	Id        int       `json:"id"`
 	Title     string    `json:"title"`
 	Caption   string    `json:"caption"`
 	PhotoUrl  string    `json:"photoUrl"`
@@ -25,7 +25,7 @@ type UpdatePhoto struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 type GetPhoto struct {
-	Id        uuid.UUID `json:"id"`
+	Id        int       `json:"id"`
 	Title     string    `json:"title"`
 	Caption   string    `json:"caption"`
 	PhotoUrl  string    `json:"photoUrl"`

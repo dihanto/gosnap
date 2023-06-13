@@ -7,7 +7,7 @@ import (
 )
 
 type PostSocialMedia struct {
-	Id             uuid.UUID `json:"id"`
+	Id             int       `json:"id"`
 	Name           string    `json:"name"`
 	SocialMediaUrl string    `json:"socialMediaUrl"`
 	UserId         uuid.UUID `json:"userId"`
@@ -15,7 +15,7 @@ type PostSocialMedia struct {
 }
 
 type GetSocialMedia struct {
-	Id             uuid.UUID `json:"id"`
+	Id             int       `json:"id"`
 	Name           string    `json:"name"`
 	SocialMediaUrl string    `json:"socialMediaUrl"`
 	UserId         uuid.UUID `json:"userId"`
@@ -24,7 +24,7 @@ type GetSocialMedia struct {
 	User           UserSocialMedia
 }
 type UpdateSocialMedia struct {
-	Id             uuid.UUID `json:"id"`
+	Id             int       `json:"id"`
 	Name           string    `json:"name"`
 	SocialMediaUrl string    `json:"socialMediaUrl"`
 	UserId         uuid.UUID `json:"userId"`

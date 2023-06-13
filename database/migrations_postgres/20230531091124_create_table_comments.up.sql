@@ -1,7 +1,7 @@
 CREATE TABLE comments (
-    id UUID PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id UUID,
-    photo_id UUID,
+    photo_id INT,
     message VARCHAR(300) NOT NULL,
     created_at INT NOT NULL DEFAULT 0,
     updated_at INT NOT NULL DEFAULT 0,

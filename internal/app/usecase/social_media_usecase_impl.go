@@ -11,7 +11,6 @@ import (
 	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 )
 
 type SocialMediaUsecaseImpl struct {
@@ -58,7 +57,6 @@ func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(c context.Context, reques
 		SocialMediaUrl: request.SocialMediaUrl,
 		UserId:         request.UserId,
 	}
-	socialMedia.Id = uuid.New()
 
 	socialMedia, err = usecase.Repository.PostSocialMedia(ctx, tx, socialMedia)
 	if err != nil {
@@ -200,7 +198,7 @@ func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(c context.Context, requ
 	return socialMediaResponse, nil
 }
 
-func (usecase *SocialMediaUsecaseImpl) DeleteSocialMedia(c context.Context, id uuid.UUID) error {
+func (usecase *SocialMediaUsecaseImpl) DeleteSocialMedia(c context.Context, id int) error {
 	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 

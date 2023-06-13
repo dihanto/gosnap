@@ -3,7 +3,7 @@ package domain
 import "github.com/google/uuid"
 
 type SocialMedia struct {
-	Id             uuid.UUID
+	Id             int
 	Name           string
 	SocialMediaUrl string
 	UserId         uuid.UUID

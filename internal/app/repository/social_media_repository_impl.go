@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/dihanto/gosnap/model/domain"
-	"github.com/google/uuid"
 )
 
 type SocialMediaRepositoryImpl struct {
@@ -19,8 +18,9 @@ func NewSocialMediaRepository() SocialMediaRepository {
 func (repository *SocialMediaRepositoryImpl) PostSocialMedia(ctx context.Context, tx *sql.Tx, socialMedia domain.SocialMedia) (domain.SocialMedia, error) {
 	socialMedia.CreatedAt = int32(time.Now().Unix())
 
-	query := "INSERT INTO social_medias (id ,name, social_media_url, user_id, created_at) VALUES ($1, $2, $3, $4, $5)"
-	_, err := tx.ExecContext(ctx, query, socialMedia.Id, socialMedia.Name, socialMedia.SocialMediaUrl, socialMedia.UserId, socialMedia.CreatedAt)
+	query := "INSERT INTO social_medias (name, social_media_url, user_id, created_at) VALUES ($1, $2, $3, $4) RETURNING id"
+	row := tx.QueryRowContext(ctx, query, socialMedia.Name, socialMedia.SocialMediaUrl, socialMedia.UserId, socialMedia.CreatedAt)
+	err := row.Scan(&socialMedia.Id)
 	if err != nil {
 		return domain.SocialMedia{}, err
 	}
@@ -69,7 +69,7 @@ func (repository *SocialMediaRepositoryImpl) UpdateSocialMedia(ctx context.Conte
 
 }
 
-func (repository *SocialMediaRepositoryImpl) DeleteSocialMedia(ctx context.Context, tx *sql.Tx, id uuid.UUID) error {
+func (repository *SocialMediaRepositoryImpl) DeleteSocialMedia(ctx context.Context, tx *sql.Tx, id int) error {
 	deleteTime := int32(time.Now().Unix())
 
 	query := "UPDATE social_medias SET deleted_at=$1 WHERE id=$2"

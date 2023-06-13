@@ -1,5 +1,5 @@
 CREATE TABLE photos (
-    id UUID PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     caption VARCHAR(100) NOT NULL,
     photo_url VARCHAR(50) NOT NULL,

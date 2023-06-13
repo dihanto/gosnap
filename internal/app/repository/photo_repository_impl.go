@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/dihanto/gosnap/model/domain"
-	"github.com/google/uuid"
 )
 
 type PhotoRepositoryImpl struct {
@@ -20,9 +19,9 @@ func NewPhotoRepository() PhotoRepository {
 func (repository *PhotoRepositoryImpl) PostPhoto(ctx context.Context, tx *sql.Tx, photo domain.Photo) (domain.Photo, error) {
 	photo.CreatedAt = int32(time.Now().Unix())
 
-	query := "INSERT INTO photos(id, title, caption, photo_url, user_id, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
-	_, err := tx.ExecContext(ctx, query, photo.Id, photo.Title, photo.Caption, photo.PhotoUrl, photo.UserId, photo.CreatedAt)
-
+	query := "INSERT INTO photos( title, caption, photo_url, user_id, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	row := tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoUrl, photo.UserId, photo.CreatedAt)
+	err := row.Scan(&photo.Id)
 	if err != nil {
 		return domain.Photo{}, err
 	}
@@ -71,7 +70,7 @@ func (repository *PhotoRepositoryImpl) UpdatePhoto(ctx context.Context, tx *sql.
 
 }
 
-func (repository *PhotoRepositoryImpl) DeletePhoto(ctx context.Context, tx *sql.Tx, id uuid.UUID) error {
+func (repository *PhotoRepositoryImpl) DeletePhoto(ctx context.Context, tx *sql.Tx, id int) error {
 	deleteTime := int32(time.Now().Unix())
 
 	query := "UPDATE photos SET deleted_at=$1 WHERE id=$2"

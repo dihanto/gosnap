@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/dihanto/gosnap/internal/app/helper"
@@ -10,7 +11,6 @@ import (
 	"github.com/dihanto/gosnap/internal/app/usecase"
 	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -86,8 +86,8 @@ func (controller *SocialMediaControllerImpl) UpdateSocialMedia(c echo.Context) e
 	if err != nil {
 		return err
 	}
-	idString := c.Param("socialMediaId")
-	request.Id, err = uuid.Parse(idString)
+
+	request.Id, err = strconv.Atoi(c.Param("socialMediaId"))
 	if err != nil {
 		return err
 	}
@@ -114,8 +114,7 @@ func (controller *SocialMediaControllerImpl) UpdateSocialMedia(c echo.Context) e
 }
 
 func (controller *SocialMediaControllerImpl) DeleteSocialMedia(c echo.Context) error {
-	idString := c.Param("socialMediaId")
-	id, err := uuid.Parse(idString)
+	id, err := strconv.Atoi(c.Param("socialMediaId"))
 	if err != nil {
 		return err
 	}

@@ -5,12 +5,11 @@ import (
 
 	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
-	"github.com/google/uuid"
 )
 
 type CommentUsecase interface {
 	PostComment(ctx context.Context, request request.Comment) (response.PostComment, error)
 	GetComment(ctx context.Context) ([]response.GetComment, error)
 	UpdateComment(ctx context.Context, request request.Comment) (response.UpdateComment, error)
-	DeleteComment(ctx context.Context, id uuid.UUID) error
+	DeleteComment(ctx context.Context, id int) error
 }

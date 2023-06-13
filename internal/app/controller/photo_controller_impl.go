@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/dihanto/gosnap/internal/app/helper"
@@ -10,7 +11,6 @@ import (
 	"github.com/dihanto/gosnap/internal/app/usecase"
 	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -94,7 +94,7 @@ func (controller *PhotoControllerImpl) UpdatePhoto(c echo.Context) error {
 		return err
 	}
 
-	request.Id, err = uuid.Parse(c.Param("photoId"))
+	request.Id, err = strconv.Atoi(c.Param("photoId"))
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (controller *PhotoControllerImpl) UpdatePhoto(c echo.Context) error {
 }
 
 func (controller *PhotoControllerImpl) DeletePhoto(c echo.Context) error {
-	id, err := uuid.Parse(c.Param("photoId"))
+	id, err := strconv.Atoi(c.Param("photoId"))
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,7 @@ package domain
 import "github.com/google/uuid"
 
 type Photo struct {
-	Id        uuid.UUID
+	Id        int
 	Title     string
 	Caption   string
 	PhotoUrl  string

@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/dihanto/gosnap/internal/app/helper"
@@ -10,7 +11,6 @@ import (
 	"github.com/dihanto/gosnap/internal/app/usecase"
 	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -86,8 +86,7 @@ func (controller *CommentControllerImpl) UpdateComment(c echo.Context) error {
 		return err
 	}
 
-	idString := c.Param("commentId")
-	request.Id, err = uuid.Parse(idString)
+	request.Id, err = strconv.Atoi(c.Param("commentId"))
 	if err != nil {
 		return err
 	}
@@ -114,7 +113,7 @@ func (controller *CommentControllerImpl) UpdateComment(c echo.Context) error {
 }
 
 func (controller *CommentControllerImpl) DeleteComment(c echo.Context) error {
-	id, err := uuid.Parse(c.Param("commentId"))
+	id, err := strconv.Atoi(c.Param("commentId"))
 	if err != nil {
 		return err
 	}
