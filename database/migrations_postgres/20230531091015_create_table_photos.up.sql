@@ -1,9 +1,9 @@
 CREATE TABLE photos (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     caption VARCHAR(100) NOT NULL,
     photo_url VARCHAR(50) NOT NULL,
-    user_id INT,
+    user_id UUID,
     created_at INT NOT NULL DEFAULT 0,
     updated_at INT NOT NULL DEFAULT 0,
     deleted_at INT,

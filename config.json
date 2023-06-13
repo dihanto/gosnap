@@ -19,8 +19,8 @@
     "database": {
         "connMaxIdleTime" : 300,
         "connMaxLifeTime" : 600,
-        "setMaxIdleConn" : 5,
-        "setMacOpenConn" : 12
+        "maxIdleConn" : 5,
+        "macOpenConn" : 12
     }
   }
   

@@ -8,6 +8,7 @@ import (
 
 	"github.com/dihanto/gosnap/internal/app/helper"
 	"github.com/dihanto/gosnap/model/domain"
+	"github.com/google/uuid"
 )
 
 type UserRepositoryImpl struct {
@@ -16,7 +17,6 @@ type UserRepositoryImpl struct {
 func NewUserRepository() UserRepository {
 	return &UserRepositoryImpl{}
 }
-
 func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error) {
 
 	user.CreatedAt = int32(time.Now().Unix())
@@ -26,35 +26,30 @@ func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, tx *sql.
 		return domain.User{}, err
 	}
 
-	query := "INSERT INTO users (username, email, password, age, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
-	row := tx.QueryRowContext(ctx, query, user.Username, user.Email, password, user.Age, user.CreatedAt)
-
-	var id int
-	err = row.Scan(&id)
+	query := "INSERT INTO users (id, username, email, password, age, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
+	_, err = tx.ExecContext(ctx, query, user.Id, user.Username, user.Email, password, user.Age, user.CreatedAt)
 	if err != nil {
 		return domain.User{}, err
 	}
 
-	user.Id = id
-
 	return user, nil
 }
 
-func (repository *UserRepositoryImpl) UserLogin(ctx context.Context, tx *sql.Tx, username string, password string) (bool, int, error) {
+func (repository *UserRepositoryImpl) UserLogin(ctx context.Context, tx *sql.Tx, username string, password string) (bool, uuid.UUID, error) {
 	var pwd string
-	var id int
+	var id uuid.UUID
 	query := "SELECT password, id FROM users WHERE username = $1;"
 	err := tx.QueryRowContext(ctx, query, username).Scan(&pwd, &id)
 	if err == sql.ErrNoRows {
-		return false, 0, err
+		return false, uuid.Nil, err
 	}
 	if err != nil {
-		return false, 0, err
+		return false, uuid.Nil, err
 	}
 
 	match, err := helper.CheckPasswordHash(password, pwd)
 	if !match {
-		return false, 0, err
+		return false, uuid.Nil, err
 	}
 
 	return true, id, nil
@@ -63,17 +58,22 @@ func (repository *UserRepositoryImpl) UserLogin(ctx context.Context, tx *sql.Tx,
 
 func (repository *UserRepositoryImpl) UserUpdate(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error) {
 
-	t := time.Now()
-	user.UpdatedAt = int32(t.Unix())
+	user.UpdatedAt = int32(time.Now().Unix())
 	query := "UPDATE users SET email=$1, username=$2, updated_at=$3 WHERE id=$4"
-	rows, err := tx.QueryContext(ctx, query, user.Email, user.Username, user.UpdatedAt, user.Id)
+	_, err := tx.ExecContext(ctx, query, user.Email, user.Username, user.UpdatedAt, user.Id)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	queryAge := "SELECT age FROM users WHERE id=$1"
+	rows, err := tx.QueryContext(ctx, queryAge, user.Id)
 	if err != nil {
 		return domain.User{}, err
 	}
 	defer rows.Close()
 
 	if rows.Next() {
-		err = rows.Scan(&user.Id, &user.Email, &user.Username, &user.Age, &user.UpdatedAt)
+		err = rows.Scan(&user.Age)
 		if err != nil {
 			return domain.User{}, err
 		}
@@ -82,13 +82,12 @@ func (repository *UserRepositoryImpl) UserUpdate(ctx context.Context, tx *sql.Tx
 	return user, nil
 }
 
-func (repository *UserRepositoryImpl) UserDelete(ctx context.Context, tx *sql.Tx, id int) error {
+func (repository *UserRepositoryImpl) UserDelete(ctx context.Context, tx *sql.Tx, id uuid.UUID) error {
 
-	t := time.Now()
-	timestamp := int32(t.Unix())
+	deleteTime := int32(time.Now().Unix())
 
 	query := "UPDATE users SET deleted_at=$1 WHERE id=$2"
-	_, err := tx.ExecContext(ctx, query, timestamp, id)
+	_, err := tx.ExecContext(ctx, query, deleteTime, id)
 	if err != nil {
 		return errors.New(err.Error())
 	}

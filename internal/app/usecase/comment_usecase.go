@@ -3,12 +3,14 @@ package usecase
 import (
 	"context"
 
-	"github.com/dihanto/gosnap/model/web"
+	"github.com/dihanto/gosnap/model/web/request"
+	"github.com/dihanto/gosnap/model/web/response"
+	"github.com/google/uuid"
 )
 
 type CommentUsecase interface {
-	PostComment(ctx context.Context, request web.PostComment) (web.PostComment, error)
-	GetComment(ctx context.Context) ([]web.GetComment, error)
-	UpdateComment(ctx context.Context, request web.UpdateComment) (web.UpdateComment, error)
-	DeleteComment(ctx context.Context, id int) error
+	PostComment(ctx context.Context, request request.Comment) (response.PostComment, error)
+	GetComment(ctx context.Context) ([]response.GetComment, error)
+	UpdateComment(ctx context.Context, request request.Comment) (response.UpdateComment, error)
+	DeleteComment(ctx context.Context, id uuid.UUID) error
 }

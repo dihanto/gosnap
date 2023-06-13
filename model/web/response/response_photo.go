@@ -1,30 +1,35 @@
-package web
+package response
 
-import "time"
+import (
+	"time"
 
-type Photo struct {
-	Id        int       `json:"id"`
-	Title     string    `validate:"required" json:"title"`
+	"github.com/google/uuid"
+)
+
+type PostPhoto struct {
+	Id        uuid.UUID `json:"id"`
+	Title     string    `json:"title"`
 	Caption   string    `json:"caption"`
-	PhotoUrl  string    `validate:"required" json:"photoUrl"`
-	UserId    int       `json:"userId"`
+	PhotoUrl  string    `json:"photoUrl"`
+	UserId    uuid.UUID `json:"userId"`
 	CreatedAt time.Time `json:"createdAt"`
 }
+
 type UpdatePhoto struct {
-	Id        int       `json:"id"`
-	Title     string    `validate:"required" json:"title"`
+	Id        uuid.UUID `json:"id"`
+	Title     string    `json:"title"`
 	Caption   string    `json:"caption"`
-	PhotoUrl  string    `validate:"required" json:"photoUrl"`
-	UserId    int       `json:"userId"`
+	PhotoUrl  string    `json:"photoUrl"`
+	UserId    uuid.UUID `json:"userId"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 type GetPhoto struct {
-	Id        int       `json:"id"`
+	Id        uuid.UUID `json:"id"`
 	Title     string    `json:"title"`
 	Caption   string    `json:"caption"`
 	PhotoUrl  string    `json:"photoUrl"`
-	UserId    int       `json:"userId"`
+	UserId    uuid.UUID `json:"userId"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	User      User      `json:"user"`

@@ -1,8 +1,8 @@
 CREATE TABLE social_medias (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     social_media_url VARCHAR(100) NOT NULL,
-    user_id INT,
+    user_id UUID,
     created_at INT NOT NULL DEFAULT 0,
     updated_at INT NOT NULL DEFAULT 0,
     deleted_at INT,

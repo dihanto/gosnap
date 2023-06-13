@@ -8,33 +8,40 @@ import (
 
 	"github.com/dihanto/gosnap/internal/app/repository"
 	"github.com/dihanto/gosnap/model/domain"
-	"github.com/dihanto/gosnap/model/web"
+	"github.com/dihanto/gosnap/model/web/request"
+	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type PhotoUsecaseImpl struct {
 	Repository repository.PhotoRepository
 	DB         *sql.DB
 	Validate   *validator.Validate
+	Timeout    int
 }
 
-func NewPhotoUsecase(repository repository.PhotoRepository, db *sql.DB, validate *validator.Validate) PhotoUsecase {
+func NewPhotoUsecase(repository repository.PhotoRepository, db *sql.DB, validate *validator.Validate, timeout int) PhotoUsecase {
 	return &PhotoUsecaseImpl{
 		Repository: repository,
 		DB:         db,
 		Validate:   validate,
+		Timeout:    timeout,
 	}
 }
 
-func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request web.Photo) (web.Photo, error) {
+func (usecase *PhotoUsecaseImpl) PostPhoto(c context.Context, request request.Photo) (response.PostPhoto, error) {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		return web.Photo{}, err
+		return response.PostPhoto{}, err
 	}
 
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		return web.Photo{}, err
+		return response.PostPhoto{}, err
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -52,10 +59,11 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request web.Phot
 		PhotoUrl: request.PhotoUrl,
 		UserId:   request.UserId,
 	}
+	photo.Id = uuid.New()
 
 	photo, err = usecase.Repository.PostPhoto(ctx, tx, photo)
 	if err != nil {
-		return web.Photo{}, err
+		return response.PostPhoto{}, err
 	}
 
 	err = tx.Commit()
@@ -64,12 +72,12 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request web.Phot
 		if rollbackErr != nil {
 			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-		return web.Photo{}, err
+		return response.PostPhoto{}, err
 	}
 
 	tCreate := time.Unix(int64(photo.CreatedAt), 0)
 
-	photoResponse := web.Photo{
+	photoResponse := response.PostPhoto{
 		Id:        photo.Id,
 		Title:     photo.Title,
 		Caption:   photo.Caption,
@@ -81,7 +89,10 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request web.Phot
 	return photoResponse, nil
 }
 
-func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]web.GetPhoto, error) {
+func (usecase *PhotoUsecaseImpl) GetPhoto(c context.Context) ([]response.GetPhoto, error) {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		return nil, err
@@ -96,21 +107,28 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]web.GetPhoto, 
 		}
 	}()
 
-	photos, user, err := usecase.Repository.GetPhoto(ctx, tx)
+	photos, users, err := usecase.Repository.GetPhoto(ctx, tx)
 	if err != nil {
 		return nil, err
 	}
 
-	userWeb := web.User{
-		Username: user.Username,
-		Email:    user.Email,
-	}
-
-	var photoResponse []web.GetPhoto
+	var photoResponse []response.GetPhoto
 	for _, photo := range photos {
 		tCreate := time.Unix(int64(photo.CreatedAt), 0)
 		tUpdate := time.Unix(int64(photo.UpdatedAt), 0)
-		photo := web.GetPhoto{
+
+		var user response.User
+		for _, u := range users {
+			if u.Id == photo.UserId {
+				user = response.User{
+					Username: u.Username,
+					Email:    u.Email,
+				}
+				break
+			}
+		}
+
+		photoResp := response.GetPhoto{
 			Id:        photo.Id,
 			Title:     photo.Title,
 			Caption:   photo.Caption,
@@ -118,9 +136,10 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]web.GetPhoto, 
 			UserId:    photo.UserId,
 			CreatedAt: tCreate,
 			UpdatedAt: tUpdate,
-			User:      userWeb,
+			User:      user,
 		}
-		photoResponse = append(photoResponse, photo)
+
+		photoResponse = append(photoResponse, photoResp)
 	}
 
 	err = tx.Commit()
@@ -135,15 +154,18 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]web.GetPhoto, 
 	return photoResponse, nil
 }
 
-func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request web.Photo) (web.UpdatePhoto, error) {
+func (usecase *PhotoUsecaseImpl) UpdatePhoto(c context.Context, request request.Photo) (response.UpdatePhoto, error) {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		return web.UpdatePhoto{}, err
+		return response.UpdatePhoto{}, err
 	}
 
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		return web.UpdatePhoto{}, err
+		return response.UpdatePhoto{}, err
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -165,10 +187,10 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request web.Ph
 
 	photo, err = usecase.Repository.UpdatePhoto(ctx, tx, photo)
 	if err != nil {
-		return web.UpdatePhoto{}, err
+		return response.UpdatePhoto{}, err
 	}
 
-	photoResponse := web.UpdatePhoto{
+	photoResponse := response.UpdatePhoto{
 		Id:        photo.Id,
 		Title:     photo.Title,
 		Caption:   photo.Caption,
@@ -184,13 +206,16 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request web.Ph
 		if rollbackErr != nil {
 			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-		return web.UpdatePhoto{}, err
+		return response.UpdatePhoto{}, err
 	}
 
 	return photoResponse, nil
 }
 
-func (usecase *PhotoUsecaseImpl) DeletePhoto(ctx context.Context, id int) error {
+func (usecase *PhotoUsecaseImpl) DeletePhoto(c context.Context, id uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		return err

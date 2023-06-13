@@ -8,32 +8,39 @@ import (
 
 	"github.com/dihanto/gosnap/internal/app/repository"
 	"github.com/dihanto/gosnap/model/domain"
-	"github.com/dihanto/gosnap/model/web"
+	"github.com/dihanto/gosnap/model/web/request"
+	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type UserUsecaseImpl struct {
 	UserRepository repository.UserRepository
 	DB             *sql.DB
 	Validate       *validator.Validate
+	Timeout        int
 }
 
-func NewUserUsecase(userRepository repository.UserRepository, db *sql.DB, validate *validator.Validate) UserUsecase {
+func NewUserUsecase(userRepository repository.UserRepository, db *sql.DB, validate *validator.Validate, timeout int) UserUsecase {
 	return &UserUsecaseImpl{
 		UserRepository: userRepository,
 		DB:             db,
 		Validate:       validate,
+		Timeout:        timeout,
 	}
 }
-func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request web.UserRegister) (web.UserRegister, error) {
+func (usecase *UserUsecaseImpl) UserRegister(c context.Context, request request.UserRegister) (response.UserRegister, error) {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		return web.UserRegister{}, err
+		return response.UserRegister{}, err
 	}
 
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		return web.UserRegister{}, err
+		return response.UserRegister{}, err
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -51,9 +58,11 @@ func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request web.Us
 		Password: request.Password,
 		Age:      request.Age,
 	}
+	user.Id = uuid.New()
+
 	user, err = usecase.UserRepository.UserRegister(ctx, tx, user)
 	if err != nil {
-		return web.UserRegister{}, err
+		return response.UserRegister{}, err
 	}
 
 	err = tx.Commit()
@@ -62,11 +71,11 @@ func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request web.Us
 		if rollbackErr != nil {
 			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-		return web.UserRegister{}, err
+		return response.UserRegister{}, err
 	}
 
 	tCreate := time.Unix(int64(user.CreatedAt), 0)
-	userResponse := web.UserRegister{
+	userResponse := response.UserRegister{
 		Email:     user.Email,
 		Username:  user.Username,
 		Password:  user.Password,
@@ -77,10 +86,13 @@ func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request web.Us
 	return userResponse, nil
 }
 
-func (usecase *UserUsecaseImpl) UserLogin(ctx context.Context, username string, password string) (bool, int, error) {
+func (usecase *UserUsecaseImpl) UserLogin(c context.Context, username string, password string) (bool, uuid.UUID, error) {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		return false, 0, err
+		return false, uuid.Nil, err
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -94,7 +106,7 @@ func (usecase *UserUsecaseImpl) UserLogin(ctx context.Context, username string, 
 
 	response, id, err := usecase.UserRepository.UserLogin(ctx, tx, username, password)
 	if err != nil {
-		return false, 0, err
+		return false, uuid.Nil, err
 	}
 
 	err = tx.Commit()
@@ -103,21 +115,24 @@ func (usecase *UserUsecaseImpl) UserLogin(ctx context.Context, username string, 
 		if rollbackErr != nil {
 			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-		return false, 0, err
+		return false, uuid.Nil, err
 	}
 
 	return response, id, nil
 }
 
-func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request web.UserUpdate) (web.UserUpdate, error) {
+func (usecase *UserUsecaseImpl) UserUpdate(c context.Context, request request.UserUpdate) (response.UserUpdate, error) {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		return web.UserUpdate{}, err
+		return response.UserUpdate{}, err
 	}
 
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		return web.UserUpdate{}, err
+		return response.UserUpdate{}, err
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -131,14 +146,13 @@ func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request web.User
 
 	userReq := domain.User{
 		Id:       request.Id,
-		Email:    request.Email,
 		Username: request.Username,
-		Age:      request.Age,
+		Email:    request.Email,
 	}
 
 	userResponse, err := usecase.UserRepository.UserUpdate(ctx, tx, userReq)
 	if err != nil {
-		return web.UserUpdate{}, err
+		return response.UserUpdate{}, err
 	}
 
 	err = tx.Commit()
@@ -147,11 +161,11 @@ func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request web.User
 		if rollbackErr != nil {
 			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-		return web.UserUpdate{}, err
+		return response.UserUpdate{}, err
 	}
 
 	tUpdate := time.Unix(int64(userResponse.UpdatedAt), 0)
-	user := web.UserUpdate{
+	user := response.UserUpdate{
 		Id:        userResponse.Id,
 		Email:     userResponse.Email,
 		Username:  userResponse.Username,
@@ -162,7 +176,10 @@ func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request web.User
 	return user, nil
 }
 
-func (usecase *UserUsecaseImpl) UserDelete(ctx context.Context, id int) error {
+func (usecase *UserUsecaseImpl) UserDelete(c context.Context, id uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		return err

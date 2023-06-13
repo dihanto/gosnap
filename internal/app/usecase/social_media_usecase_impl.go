@@ -8,33 +8,40 @@ import (
 
 	"github.com/dihanto/gosnap/internal/app/repository"
 	"github.com/dihanto/gosnap/model/domain"
-	"github.com/dihanto/gosnap/model/web"
+	"github.com/dihanto/gosnap/model/web/request"
+	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type SocialMediaUsecaseImpl struct {
 	Repository repository.SocialMediaRepository
 	DB         *sql.DB
 	Validate   *validator.Validate
+	Timeout    int
 }
 
-func NewSocialMediaUsecase(repository repository.SocialMediaRepository, db *sql.DB, validate *validator.Validate) SocialMediaUsecase {
+func NewSocialMediaUsecase(repository repository.SocialMediaRepository, db *sql.DB, validate *validator.Validate, timeout int) SocialMediaUsecase {
 	return &SocialMediaUsecaseImpl{
 		Repository: repository,
 		DB:         db,
 		Validate:   validate,
+		Timeout:    timeout,
 	}
 }
 
-func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(ctx context.Context, request web.PostSocialMedia) (web.PostSocialMedia, error) {
+func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(c context.Context, request request.SocialMedia) (response.PostSocialMedia, error) {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		return web.PostSocialMedia{}, err
+		return response.PostSocialMedia{}, err
 	}
 
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		return web.PostSocialMedia{}, err
+		return response.PostSocialMedia{}, err
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -51,10 +58,11 @@ func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(ctx context.Context, requ
 		SocialMediaUrl: request.SocialMediaUrl,
 		UserId:         request.UserId,
 	}
+	socialMedia.Id = uuid.New()
 
 	socialMedia, err = usecase.Repository.PostSocialMedia(ctx, tx, socialMedia)
 	if err != nil {
-		return web.PostSocialMedia{}, err
+		return response.PostSocialMedia{}, err
 	}
 
 	err = tx.Commit()
@@ -63,10 +71,10 @@ func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(ctx context.Context, requ
 		if rollbackErr != nil {
 			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-		return web.PostSocialMedia{}, err
+		return response.PostSocialMedia{}, err
 	}
 
-	socialMediaResponse := web.PostSocialMedia{
+	socialMediaResponse := response.PostSocialMedia{
 		Id:             socialMedia.Id,
 		Name:           socialMedia.Name,
 		SocialMediaUrl: socialMedia.SocialMediaUrl,
@@ -77,7 +85,10 @@ func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(ctx context.Context, requ
 	return socialMediaResponse, nil
 }
 
-func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(ctx context.Context) ([]web.GetSocialMedia, error) {
+func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(c context.Context) ([]response.GetSocialMedia, error) {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		return nil, err
@@ -92,25 +103,33 @@ func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(ctx context.Context) ([]we
 		}
 	}()
 
-	socialMedias, user, err := usecase.Repository.GetSocialMedia(ctx, tx)
+	socialMedias, users, err := usecase.Repository.GetSocialMedia(ctx, tx)
 	if err != nil {
 		return nil, err
 	}
-	userWeb := web.UserSocialMedia{
-		Id:       user.Id,
-		Username: user.Username,
-	}
 
-	var socialMediasResponse []web.GetSocialMedia
+	var socialMediasResponse []response.GetSocialMedia
 	for _, socialMedia := range socialMedias {
-		socialMediaResponse := web.GetSocialMedia{
+
+		var userResponse response.UserSocialMedia
+		for _, user := range users {
+			if user.Id == socialMedia.UserId {
+				userResponse = response.UserSocialMedia{
+					Id:       user.Id,
+					Username: user.Username,
+				}
+			}
+
+		}
+
+		socialMediaResponse := response.GetSocialMedia{
 			Id:             socialMedia.Id,
 			Name:           socialMedia.Name,
 			SocialMediaUrl: socialMedia.SocialMediaUrl,
 			UserId:         socialMedia.UserId,
 			CreatedAt:      time.Unix(int64(socialMedia.CreatedAt), 0),
 			UpdatedAt:      time.Unix(int64(socialMedia.UpdatedAt), 0),
-			User:           userWeb,
+			User:           userResponse,
 		}
 		socialMediasResponse = append(socialMediasResponse, socialMediaResponse)
 	}
@@ -127,15 +146,18 @@ func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(ctx context.Context) ([]we
 	return socialMediasResponse, nil
 }
 
-func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(ctx context.Context, request web.UpdateSocialMedia) (web.UpdateSocialMedia, error) {
+func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(c context.Context, request request.SocialMedia) (response.UpdateSocialMedia, error) {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	err := usecase.Validate.Struct(request)
 	if err != nil {
-		return web.UpdateSocialMedia{}, err
+		return response.UpdateSocialMedia{}, err
 	}
 
 	tx, err := usecase.DB.Begin()
 	if err != nil {
-		return web.UpdateSocialMedia{}, err
+		return response.UpdateSocialMedia{}, err
 	}
 	defer func() {
 		if r := recover(); r != nil {
@@ -155,10 +177,10 @@ func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(ctx context.Context, re
 
 	socialMedia, err = usecase.Repository.UpdateSocialMedia(ctx, tx, socialMedia)
 	if err != nil {
-		return web.UpdateSocialMedia{}, err
+		return response.UpdateSocialMedia{}, err
 	}
 
-	socialMediaResponse := web.UpdateSocialMedia{
+	socialMediaResponse := response.UpdateSocialMedia{
 		Id:             socialMedia.Id,
 		Name:           socialMedia.Name,
 		SocialMediaUrl: socialMedia.SocialMediaUrl,
@@ -172,14 +194,16 @@ func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(ctx context.Context, re
 		if rollbackErr != nil {
 			log.Println("Failed to rollback transaction:", rollbackErr)
 		}
-		return web.UpdateSocialMedia{}, err
+		return response.UpdateSocialMedia{}, err
 	}
 
 	return socialMediaResponse, nil
 }
 
-func (usecase *SocialMediaUsecaseImpl) DeleteSocialMedia(ctx context.Context, id int) error {
-	// Begin transacion
+func (usecase *SocialMediaUsecaseImpl) DeleteSocialMedia(c context.Context, id uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		return err

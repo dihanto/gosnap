@@ -1,29 +1,31 @@
 package helper
 
 import (
-	"fmt"
-
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 )
 
-func GetUserDataFromToken(tokenString string) (int, error) {
+func GetUserDataFromToken(tokenString string) (uuid.UUID, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte("snapsecret"), nil
 	})
 
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse token: %v", err)
+		return uuid.Nil, err
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		userIdFloat, ok := claims["id"].(float64)
+		id, ok := claims["id"].(string)
 		if !ok {
-			return 0, fmt.Errorf("failed to retrieve id from token")
+			return uuid.Nil, err
 		}
 
-		userId := int(userIdFloat)
+		userId, err := uuid.Parse(id)
+		if err != nil {
+			return uuid.Nil, err
+		}
 		return userId, nil
 	}
 
-	return 0, fmt.Errorf("invalid token")
+	return uuid.Nil, err
 }

@@ -1,53 +1,66 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/dihanto/gosnap/internal/app/helper"
+	"github.com/dihanto/gosnap/internal/app/middleware"
 	"github.com/dihanto/gosnap/internal/app/usecase"
-	"github.com/dihanto/gosnap/model/web"
+	"github.com/dihanto/gosnap/model/web/request"
+	"github.com/dihanto/gosnap/model/web/response"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 type PhotoControllerImpl struct {
 	Usecase usecase.PhotoUsecase
+	Route   *echo.Echo
 }
 
-func NewPhotoController(usecase usecase.PhotoUsecase) PhotoController {
-	return &PhotoControllerImpl{
+func NewPhotoController(usecase usecase.PhotoUsecase, route *echo.Echo) PhotoController {
+	controller := &PhotoControllerImpl{
 		Usecase: usecase,
+		Route:   route,
 	}
+
+	controller.route(route)
+	return controller
+}
+func (photoControllerImpl *PhotoControllerImpl) route(e *echo.Echo) {
+	photosGroup := e.Group("/photos")
+	photosGroup.Use(middleware.Auth)
+	photosGroup.POST("", photoControllerImpl.PostPhoto)
+	photosGroup.GET("", photoControllerImpl.GetPhoto)
+	photosGroup.PUT("/:photoId", photoControllerImpl.UpdatePhoto)
+	photosGroup.DELETE("/:photoId", photoControllerImpl.DeletePhoto)
 }
 
 func (controller *PhotoControllerImpl) PostPhoto(c echo.Context) error {
-	authHeader := c.Request().Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	userId, err := helper.GetUserDataFromToken(tokenString)
+	request := request.Photo{}
+
+	err := json.NewDecoder(c.Request().Body).Decode(&request)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return err
 	}
 
-	title := c.FormValue("title")
-	caption := c.FormValue("caption")
-	photoUrl := c.FormValue("photoUrl")
-
-	request := web.Photo{
-		Title:    title,
-		Caption:  caption,
-		PhotoUrl: photoUrl,
-		UserId:   userId,
+	authHeader := c.Request().Header.Get("Authorization")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	request.UserId, err = helper.GetUserDataFromToken(tokenString)
+	if err != nil {
+		return err
 	}
 
 	photoResponse, err := controller.Usecase.PostPhoto(c.Request().Context(), request)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return err
 	}
 
-	webResponse := web.WebResponse{
-		Status: http.StatusCreated,
-		Data:   photoResponse,
+	webResponse := response.WebResponse{
+		Status:  http.StatusCreated,
+		Message: "Photo have been successfully posted",
+		Data:    photoResponse,
 	}
 
 	return c.JSON(http.StatusOK, webResponse)
@@ -56,69 +69,64 @@ func (controller *PhotoControllerImpl) PostPhoto(c echo.Context) error {
 func (controller *PhotoControllerImpl) GetPhoto(c echo.Context) error {
 	photoResponse, err := controller.Usecase.GetPhoto(c.Request().Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return err
 	}
 
-	webResponse := web.WebResponse{
-		Status: http.StatusOK,
-		Data:   photoResponse,
+	webResponse := response.WebResponse{
+		Status:  http.StatusOK,
+		Message: "Success get all photos",
+		Data:    photoResponse,
 	}
 
 	return c.JSON(http.StatusOK, webResponse)
 }
 
 func (controller *PhotoControllerImpl) UpdatePhoto(c echo.Context) error {
+	request := request.Photo{}
+	err := json.NewDecoder(c.Request().Body).Decode(&request)
+	if err != nil {
+		return err
+	}
 	authHeader := c.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	userId, err := helper.GetUserDataFromToken(tokenString)
+	request.UserId, err = helper.GetUserDataFromToken(tokenString)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return err
 	}
 
-	id, err := strconv.Atoi(c.Param("photoId"))
+	request.Id, err = uuid.Parse(c.Param("photoId"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	title := c.FormValue("title")
-	caption := c.FormValue("caption")
-	photoUrl := c.FormValue("photoUrl")
-
-	request := web.Photo{
-		Title:    title,
-		Caption:  caption,
-		PhotoUrl: photoUrl,
-		Id:       id,
-		UserId:   userId,
+		return err
 	}
 
 	photoResponse, err := controller.Usecase.UpdatePhoto(c.Request().Context(), request)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return err
 	}
 
-	webResponse := web.WebResponse{
-		Status: http.StatusOK,
-		Data:   photoResponse,
+	webResponse := response.WebResponse{
+		Status:  http.StatusOK,
+		Message: "Success update photo",
+		Data:    photoResponse,
 	}
 
 	return c.JSON(http.StatusOK, webResponse)
 }
 
 func (controller *PhotoControllerImpl) DeletePhoto(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("photoId"))
+	id, err := uuid.Parse(c.Param("photoId"))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	err = controller.Usecase.DeletePhoto(c.Request().Context(), id)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return err
 	}
 
-	webResponse := web.WebResponse{
-		Status: http.StatusOK,
-		Data:   "Your photo has been successfully deleted",
+	webResponse := response.WebResponse{
+		Status:  http.StatusOK,
+		Message: "Your photo has been successfully deleted",
 	}
 
 	return c.JSON(http.StatusOK, webResponse)

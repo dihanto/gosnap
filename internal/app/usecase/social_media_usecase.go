@@ -3,12 +3,14 @@ package usecase
 import (
 	"context"
 
-	"github.com/dihanto/gosnap/model/web"
+	"github.com/dihanto/gosnap/model/web/request"
+	"github.com/dihanto/gosnap/model/web/response"
+	"github.com/google/uuid"
 )
 
 type SocialMediaUsecase interface {
-	PostSocialMedia(ctx context.Context, request web.PostSocialMedia) (web.PostSocialMedia, error)
-	GetSocialMedia(ctx context.Context) ([]web.GetSocialMedia, error)
-	UpdateSocialMedia(ctx context.Context, request web.UpdateSocialMedia) (web.UpdateSocialMedia, error)
-	DeleteSocialMedia(ctx context.Context, id int) error
+	PostSocialMedia(ctx context.Context, request request.SocialMedia) (response.PostSocialMedia, error)
+	GetSocialMedia(ctx context.Context) ([]response.GetSocialMedia, error)
+	UpdateSocialMedia(ctx context.Context, request request.SocialMedia) (response.UpdateSocialMedia, error)
+	DeleteSocialMedia(ctx context.Context, id uuid.UUID) error
 }
