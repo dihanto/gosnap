@@ -10,11 +10,7 @@ import (
 
 func NewDb() (db *sql.DB, err error) {
 
-	viper.SetConfigName("config")
-	viper.SetConfigType("json")
-	viper.AddConfigPath(".")
-	viper.ReadInConfig()
-
+	ViperReadConfig()
 	host := viper.GetString("postgres.host")
 	port := viper.GetString("postgres.port")
 	user := viper.GetString("postgres.user")

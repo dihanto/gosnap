@@ -13,46 +13,44 @@ import (
 )
 
 func main() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("json")
-	viper.AddConfigPath(".")
-	viper.ReadInConfig()
-	host := viper.GetString("server.host")
-	port := viper.GetString("server.port")
-	timeout := viper.GetInt("usecase.timeout")
 
-	e := echo.New()
-	e.HTTPErrorHandler = exception.ErrorHandler
+	config.ViperReadConfig()
+	serverHost := viper.GetString("server.host")
+	serverPort := viper.GetString("server.port")
+	usecaseTimeout := viper.GetInt("usecase.timeout")
 
-	db, _ := config.NewDb()
+	echo := echo.New()
+	echo.HTTPErrorHandler = exception.ErrorHandler
+
+	databaseConnection, _ := config.NewDb()
 	validate := validator.New()
 	validate.RegisterValidation("email_uniq", helper.ValidateEmailUniq)
 	validate.RegisterValidation("username_uniq", helper.ValidateUsernameUniq)
 
 	{
 		userRepository := repository.NewUserRepository()
-		userUsecase := usecase.NewUserUsecase(userRepository, db, validate, timeout)
-		_ = controller.NewUserController(userUsecase, e)
+		userUsecase := usecase.NewUserUsecase(userRepository, databaseConnection, validate, usecaseTimeout)
+		_ = controller.NewUserController(userUsecase, echo)
 	}
 
 	{
 		photoRepository := repository.NewPhotoRepository()
-		photoUsecase := usecase.NewPhotoUsecase(photoRepository, db, validate, timeout)
-		_ = controller.NewPhotoController(photoUsecase, e)
+		photoUsecase := usecase.NewPhotoUsecase(photoRepository, databaseConnection, validate, usecaseTimeout)
+		_ = controller.NewPhotoController(photoUsecase, echo)
 	}
 
 	{
 		commentRepository := repository.NewCommentRepository()
-		commentUsecase := usecase.NewCommentUsecase(commentRepository, db, validate, timeout)
-		_ = controller.NewCommentController(commentUsecase, e)
+		commentUsecase := usecase.NewCommentUsecase(commentRepository, databaseConnection, validate, usecaseTimeout)
+		_ = controller.NewCommentController(commentUsecase, echo)
 	}
 
 	{
 		socialMediaRepository := repository.NewSocialMediaRepository()
-		socialMediaUsecase := usecase.NewSocialMediaUsecase(socialMediaRepository, db, validate, timeout)
-		_ = controller.NewSocialMediaController(socialMediaUsecase, e)
+		socialMediaUsecase := usecase.NewSocialMediaUsecase(socialMediaRepository, databaseConnection, validate, usecaseTimeout)
+		_ = controller.NewSocialMediaController(socialMediaUsecase, echo)
 	}
 
-	e.Start(host + ":" + port)
+	echo.Start(serverHost + ":" + serverPort)
 
 }

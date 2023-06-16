@@ -12,45 +12,45 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func ErrorHandler(err error, c echo.Context) {
-	if validationError(err, c) {
+func ErrorHandler(err error, ctx echo.Context) {
+	if validationError(err, ctx) {
 		return
 	}
 
 	if err == bcrypt.ErrMismatchedHashAndPassword {
-		errPasswordDoNotMatch(err, c)
+		errPasswordDoNotMatch(err, ctx)
 		return
 	}
 	if strings.Contains(err.Error(), "token is expired") {
-		unauthorizedError(err, c)
+		unauthorizedError(err, ctx)
 		return
 	}
 	if err == sql.ErrNoRows {
-		notFoundError(err, c)
+		notFoundError(err, ctx)
 		return
 	}
 
-	internalServerError(err, c)
+	internalServerError(err, ctx)
 }
 
-func notFoundError(err error, c echo.Context) {
+func notFoundError(err error, ctx echo.Context) {
 	webResponse := response.WebResponse{
 		Status:  http.StatusNotFound,
 		Message: "Not Found",
 	}
 
-	c.JSON(http.StatusNotFound, webResponse)
+	ctx.JSON(http.StatusNotFound, webResponse)
 }
-func unauthorizedError(err error, c echo.Context) {
+func unauthorizedError(err error, ctx echo.Context) {
 	webResponse := response.WebResponse{
 		Status:  http.StatusUnauthorized,
 		Message: "Unauthorized",
 	}
 
-	c.JSON(http.StatusUnauthorized, webResponse)
+	ctx.JSON(http.StatusUnauthorized, webResponse)
 }
 
-func internalServerError(err interface{}, c echo.Context) {
+func internalServerError(err interface{}, ctx echo.Context) {
 	var dataError string
 	if err != nil {
 		dataError = err.(error).Error()
@@ -61,10 +61,10 @@ func internalServerError(err interface{}, c echo.Context) {
 		Data:    dataError,
 	}
 
-	c.JSON(http.StatusInternalServerError, webResponse)
+	ctx.JSON(http.StatusInternalServerError, webResponse)
 }
 
-func validationError(errs interface{}, c echo.Context) bool {
+func validationError(errs interface{}, ctx echo.Context) bool {
 	exception, ok := errs.(validator.ValidationErrors)
 	if ok {
 		for _, err := range exception {
@@ -91,18 +91,18 @@ func validationError(errs interface{}, c echo.Context) bool {
 				Status:  http.StatusBadRequest,
 				Message: message,
 			}
-			c.JSON(http.StatusBadRequest, webResponse)
+			ctx.JSON(http.StatusBadRequest, webResponse)
 		}
 		return true
 	}
 	return false
 }
 
-func errPasswordDoNotMatch(err error, c echo.Context) {
+func errPasswordDoNotMatch(err error, ctx echo.Context) {
 	webResponse := response.WebResponse{
 		Status:  http.StatusBadRequest,
 		Message: "Password does not match",
 	}
 
-	c.JSON(http.StatusBadRequest, webResponse)
+	ctx.JSON(http.StatusBadRequest, webResponse)
 }
