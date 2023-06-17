@@ -28,8 +28,8 @@ func NewCommentUsecase(repository repository.CommentRepository, db *sql.DB, vali
 		Timeout:    timeout,
 	}
 }
-func (usecase *CommentUsecaseImpl) PostComment(c context.Context, request request.Comment) (response.PostComment, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *CommentUsecaseImpl) PostComment(ctx context.Context, request request.Comment) (response.PostComment, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	err := usecase.Validate.Struct(request)
@@ -42,12 +42,12 @@ func (usecase *CommentUsecaseImpl) PostComment(c context.Context, request reques
 		return response.PostComment{}, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -82,8 +82,8 @@ func (usecase *CommentUsecaseImpl) PostComment(c context.Context, request reques
 	return commentResponse, nil
 }
 
-func (usecase *CommentUsecaseImpl) GetComment(c context.Context) ([]response.GetComment, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *CommentUsecaseImpl) GetComment(ctx context.Context) ([]response.GetComment, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	tx, err := usecase.DB.Begin()
@@ -91,12 +91,12 @@ func (usecase *CommentUsecaseImpl) GetComment(c context.Context) ([]response.Get
 		return nil, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -156,8 +156,8 @@ func (usecase *CommentUsecaseImpl) GetComment(c context.Context) ([]response.Get
 	return commentsResponse, nil
 }
 
-func (usecase *CommentUsecaseImpl) UpdateComment(c context.Context, request request.Comment) (response.UpdateComment, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *CommentUsecaseImpl) UpdateComment(ctx context.Context, request request.Comment) (response.UpdateComment, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	err := usecase.Validate.Struct(request)
@@ -170,12 +170,12 @@ func (usecase *CommentUsecaseImpl) UpdateComment(c context.Context, request requ
 		return response.UpdateComment{}, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -210,8 +210,8 @@ func (usecase *CommentUsecaseImpl) UpdateComment(c context.Context, request requ
 	return commentResponse, nil
 }
 
-func (usecase *CommentUsecaseImpl) DeleteComment(c context.Context, id int) error {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *CommentUsecaseImpl) DeleteComment(ctx context.Context, id int) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	tx, err := usecase.DB.Begin()
@@ -219,12 +219,12 @@ func (usecase *CommentUsecaseImpl) DeleteComment(c context.Context, id int) erro
 		return err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 

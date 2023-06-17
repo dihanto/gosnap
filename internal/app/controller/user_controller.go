@@ -3,8 +3,8 @@ package controller
 import "github.com/labstack/echo/v4"
 
 type UserController interface {
-	UserRegister(c echo.Context) error
-	UserLogin(c echo.Context) error
-	UserUpdate(c echo.Context) error
-	UserDelete(c echo.Context) error
+	UserRegister(ctx echo.Context) error
+	UserLogin(ctx echo.Context) error
+	UserUpdate(ctx echo.Context) error
+	UserDelete(ctx echo.Context) error
 }

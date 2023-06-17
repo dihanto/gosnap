@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func ViperReadConfig() {
+func InitLoadConfiguration() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
 	viper.AddConfigPath("cmd")

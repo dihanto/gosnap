@@ -27,8 +27,8 @@ func NewCommentController(usecase usecase.CommentUsecase, route *echo.Echo) Comm
 	controller.route(route)
 	return controller
 }
-func (commentControllerImpl *CommentControllerImpl) route(e *echo.Echo) {
-	commentsGroup := e.Group("/comments")
+func (commentControllerImpl *CommentControllerImpl) route(echo *echo.Echo) {
+	commentsGroup := echo.Group("/comments")
 	commentsGroup.Use(middleware.Auth)
 	commentsGroup.POST("", commentControllerImpl.PostComment)
 	commentsGroup.GET("", commentControllerImpl.GetComment)
@@ -36,21 +36,21 @@ func (commentControllerImpl *CommentControllerImpl) route(e *echo.Echo) {
 	commentsGroup.DELETE("/:commentId", commentControllerImpl.DeleteComment)
 }
 
-func (controller *CommentControllerImpl) PostComment(c echo.Context) error {
+func (controller *CommentControllerImpl) PostComment(ctx echo.Context) error {
 	request := request.Comment{}
-	err := json.NewDecoder(c.Request().Body).Decode(&request)
+	err := json.NewDecoder(ctx.Request().Body).Decode(&request)
 	if err != nil {
 		return err
 	}
 
-	authHeader := c.Request().Header.Get("Authorization")
+	authHeader := ctx.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	request.UserId, err = helper.GetUserDataFromToken(tokenString)
 	if err != nil {
 		return err
 	}
 
-	commentResponse, err := controller.Usecase.PostComment(c.Request().Context(), request)
+	commentResponse, err := controller.Usecase.PostComment(ctx.Request().Context(), request)
 	if err != nil {
 		return err
 	}
@@ -61,11 +61,11 @@ func (controller *CommentControllerImpl) PostComment(c echo.Context) error {
 		Data:    commentResponse,
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *CommentControllerImpl) GetComment(c echo.Context) error {
-	commentResponse, err := controller.Usecase.GetComment(c.Request().Context())
+func (controller *CommentControllerImpl) GetComment(ctx echo.Context) error {
+	commentResponse, err := controller.Usecase.GetComment(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -76,29 +76,29 @@ func (controller *CommentControllerImpl) GetComment(c echo.Context) error {
 		Data:    commentResponse,
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *CommentControllerImpl) UpdateComment(c echo.Context) error {
+func (controller *CommentControllerImpl) UpdateComment(ctx echo.Context) error {
 	request := request.Comment{}
-	err := json.NewDecoder(c.Request().Body).Decode(&request)
+	err := json.NewDecoder(ctx.Request().Body).Decode(&request)
 	if err != nil {
 		return err
 	}
 
-	request.Id, err = strconv.Atoi(c.Param("commentId"))
+	request.Id, err = strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
 		return err
 	}
 
-	authHeader := c.Request().Header.Get("Authorization")
+	authHeader := ctx.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	request.UserId, err = helper.GetUserDataFromToken(tokenString)
 	if err != nil {
 		return err
 	}
 
-	commentResponse, err := controller.Usecase.UpdateComment(c.Request().Context(), request)
+	commentResponse, err := controller.Usecase.UpdateComment(ctx.Request().Context(), request)
 	if err != nil {
 		return err
 	}
@@ -109,16 +109,16 @@ func (controller *CommentControllerImpl) UpdateComment(c echo.Context) error {
 		Data:    commentResponse,
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *CommentControllerImpl) DeleteComment(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("commentId"))
+func (controller *CommentControllerImpl) DeleteComment(ctx echo.Context) error {
+	id, err := strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
 		return err
 	}
 
-	err = controller.Usecase.DeleteComment(c.Request().Context(), id)
+	err = controller.Usecase.DeleteComment(ctx.Request().Context(), id)
 	if err != nil {
 		return err
 	}
@@ -128,5 +128,5 @@ func (controller *CommentControllerImpl) DeleteComment(c echo.Context) error {
 		Message: "Your comment has been successfully deleted",
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }

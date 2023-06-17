@@ -29,8 +29,8 @@ func NewSocialMediaUsecase(repository repository.SocialMediaRepository, db *sql.
 	}
 }
 
-func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(c context.Context, request request.SocialMedia) (response.PostSocialMedia, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(ctx context.Context, request request.SocialMedia) (response.PostSocialMedia, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	err := usecase.Validate.Struct(request)
@@ -43,12 +43,12 @@ func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(c context.Context, reques
 		return response.PostSocialMedia{}, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -83,8 +83,8 @@ func (usecase *SocialMediaUsecaseImpl) PostSocialMedia(c context.Context, reques
 	return socialMediaResponse, nil
 }
 
-func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(c context.Context) ([]response.GetSocialMedia, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(ctx context.Context) ([]response.GetSocialMedia, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	tx, err := usecase.DB.Begin()
@@ -92,12 +92,12 @@ func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(c context.Context) ([]resp
 		return nil, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -144,8 +144,8 @@ func (usecase *SocialMediaUsecaseImpl) GetSocialMedia(c context.Context) ([]resp
 	return socialMediasResponse, nil
 }
 
-func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(c context.Context, request request.SocialMedia) (response.UpdateSocialMedia, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(ctx context.Context, request request.SocialMedia) (response.UpdateSocialMedia, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	err := usecase.Validate.Struct(request)
@@ -158,12 +158,12 @@ func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(c context.Context, requ
 		return response.UpdateSocialMedia{}, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -198,8 +198,8 @@ func (usecase *SocialMediaUsecaseImpl) UpdateSocialMedia(c context.Context, requ
 	return socialMediaResponse, nil
 }
 
-func (usecase *SocialMediaUsecaseImpl) DeleteSocialMedia(c context.Context, id int) error {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *SocialMediaUsecaseImpl) DeleteSocialMedia(ctx context.Context, id int) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	tx, err := usecase.DB.Begin()
@@ -207,12 +207,12 @@ func (usecase *SocialMediaUsecaseImpl) DeleteSocialMedia(c context.Context, id i
 		return err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 

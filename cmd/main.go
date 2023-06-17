@@ -14,7 +14,7 @@ import (
 
 func main() {
 
-	config.ViperReadConfig()
+	config.InitLoadConfiguration()
 	serverHost := viper.GetString("server.host")
 	serverPort := viper.GetString("server.port")
 	usecaseTimeout := viper.GetInt("usecase.timeout")
@@ -22,7 +22,7 @@ func main() {
 	echo := echo.New()
 	echo.HTTPErrorHandler = exception.ErrorHandler
 
-	databaseConnection, _ := config.NewDb()
+	databaseConnection, _ := config.InitDatabaseConnection()
 	validate := validator.New()
 	validate.RegisterValidation("email_uniq", helper.ValidateEmailUniq)
 	validate.RegisterValidation("username_uniq", helper.ValidateUsernameUniq)

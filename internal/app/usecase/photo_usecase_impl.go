@@ -29,8 +29,8 @@ func NewPhotoUsecase(repository repository.PhotoRepository, db *sql.DB, validate
 	}
 }
 
-func (usecase *PhotoUsecaseImpl) PostPhoto(c context.Context, request request.Photo) (response.PostPhoto, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request request.Photo) (response.PostPhoto, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	err := usecase.Validate.Struct(request)
@@ -43,12 +43,12 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(c context.Context, request request.Ph
 		return response.PostPhoto{}, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -87,8 +87,8 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(c context.Context, request request.Ph
 	return photoResponse, nil
 }
 
-func (usecase *PhotoUsecaseImpl) GetPhoto(c context.Context) ([]response.GetPhoto, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]response.GetPhoto, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	tx, err := usecase.DB.Begin()
@@ -96,12 +96,12 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(c context.Context) ([]response.GetPhot
 		return nil, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -152,8 +152,8 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(c context.Context) ([]response.GetPhot
 	return photoResponse, nil
 }
 
-func (usecase *PhotoUsecaseImpl) UpdatePhoto(c context.Context, request request.Photo) (response.UpdatePhoto, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request request.Photo) (response.UpdatePhoto, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	err := usecase.Validate.Struct(request)
@@ -166,12 +166,12 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(c context.Context, request request.
 		return response.UpdatePhoto{}, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -210,8 +210,8 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(c context.Context, request request.
 	return photoResponse, nil
 }
 
-func (usecase *PhotoUsecaseImpl) DeletePhoto(c context.Context, id int) error {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *PhotoUsecaseImpl) DeletePhoto(ctx context.Context, id int) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	tx, err := usecase.DB.Begin()
@@ -219,12 +219,12 @@ func (usecase *PhotoUsecaseImpl) DeletePhoto(c context.Context, id int) error {
 		return err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 

@@ -29,8 +29,8 @@ func NewUserUsecase(userRepository repository.UserRepository, db *sql.DB, valida
 		Timeout:        timeout,
 	}
 }
-func (usecase *UserUsecaseImpl) UserRegister(c context.Context, request request.UserRegister) (response.UserRegister, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request request.UserRegister) (response.UserRegister, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	err := usecase.Validate.Struct(request)
@@ -43,12 +43,12 @@ func (usecase *UserUsecaseImpl) UserRegister(c context.Context, request request.
 		return response.UserRegister{}, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -86,8 +86,8 @@ func (usecase *UserUsecaseImpl) UserRegister(c context.Context, request request.
 	return userResponse, nil
 }
 
-func (usecase *UserUsecaseImpl) UserLogin(c context.Context, username string, password string) (bool, uuid.UUID, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *UserUsecaseImpl) UserLogin(ctx context.Context, username string, password string) (bool, uuid.UUID, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	tx, err := usecase.DB.Begin()
@@ -95,12 +95,12 @@ func (usecase *UserUsecaseImpl) UserLogin(c context.Context, username string, pa
 		return false, uuid.Nil, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -121,8 +121,8 @@ func (usecase *UserUsecaseImpl) UserLogin(c context.Context, username string, pa
 	return response, id, nil
 }
 
-func (usecase *UserUsecaseImpl) UserUpdate(c context.Context, request request.UserUpdate) (response.UserUpdate, error) {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request request.UserUpdate) (response.UserUpdate, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	err := usecase.Validate.Struct(request)
@@ -135,12 +135,12 @@ func (usecase *UserUsecaseImpl) UserUpdate(c context.Context, request request.Us
 		return response.UserUpdate{}, err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 
@@ -176,8 +176,8 @@ func (usecase *UserUsecaseImpl) UserUpdate(c context.Context, request request.Us
 	return user, nil
 }
 
-func (usecase *UserUsecaseImpl) UserDelete(c context.Context, id uuid.UUID) error {
-	ctx, cancel := context.WithTimeout(c, time.Duration(usecase.Timeout)*time.Second)
+func (usecase *UserUsecaseImpl) UserDelete(ctx context.Context, id uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
 	tx, err := usecase.DB.Begin()
@@ -185,12 +185,12 @@ func (usecase *UserUsecaseImpl) UserDelete(c context.Context, id uuid.UUID) erro
 		return err
 	}
 	defer func() {
-		if r := recover(); r != nil {
+		if recover := recover(); recover != nil {
 			rollbackErr := tx.Rollback()
 			if rollbackErr != nil {
 				log.Println("Failed to rollback transaction:", rollbackErr)
 			}
-			panic(r)
+			panic(recover)
 		}
 	}()
 

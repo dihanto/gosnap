@@ -28,8 +28,8 @@ func NewPhotoController(usecase usecase.PhotoUsecase, route *echo.Echo) PhotoCon
 	controller.route(route)
 	return controller
 }
-func (photoControllerImpl *PhotoControllerImpl) route(e *echo.Echo) {
-	photosGroup := e.Group("/photos")
+func (photoControllerImpl *PhotoControllerImpl) route(echo *echo.Echo) {
+	photosGroup := echo.Group("/photos")
 	photosGroup.Use(middleware.Auth)
 	photosGroup.POST("", photoControllerImpl.PostPhoto)
 	photosGroup.GET("", photoControllerImpl.GetPhoto)
@@ -37,22 +37,22 @@ func (photoControllerImpl *PhotoControllerImpl) route(e *echo.Echo) {
 	photosGroup.DELETE("/:photoId", photoControllerImpl.DeletePhoto)
 }
 
-func (controller *PhotoControllerImpl) PostPhoto(c echo.Context) error {
+func (controller *PhotoControllerImpl) PostPhoto(ctx echo.Context) error {
 	request := request.Photo{}
 
-	err := json.NewDecoder(c.Request().Body).Decode(&request)
+	err := json.NewDecoder(ctx.Request().Body).Decode(&request)
 	if err != nil {
 		return err
 	}
 
-	authHeader := c.Request().Header.Get("Authorization")
+	authHeader := ctx.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	request.UserId, err = helper.GetUserDataFromToken(tokenString)
 	if err != nil {
 		return err
 	}
 
-	photoResponse, err := controller.Usecase.PostPhoto(c.Request().Context(), request)
+	photoResponse, err := controller.Usecase.PostPhoto(ctx.Request().Context(), request)
 	if err != nil {
 		return err
 	}
@@ -63,11 +63,11 @@ func (controller *PhotoControllerImpl) PostPhoto(c echo.Context) error {
 		Data:    photoResponse,
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *PhotoControllerImpl) GetPhoto(c echo.Context) error {
-	photoResponse, err := controller.Usecase.GetPhoto(c.Request().Context())
+func (controller *PhotoControllerImpl) GetPhoto(ctx echo.Context) error {
+	photoResponse, err := controller.Usecase.GetPhoto(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -78,28 +78,28 @@ func (controller *PhotoControllerImpl) GetPhoto(c echo.Context) error {
 		Data:    photoResponse,
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *PhotoControllerImpl) UpdatePhoto(c echo.Context) error {
+func (controller *PhotoControllerImpl) UpdatePhoto(ctx echo.Context) error {
 	request := request.Photo{}
-	err := json.NewDecoder(c.Request().Body).Decode(&request)
+	err := json.NewDecoder(ctx.Request().Body).Decode(&request)
 	if err != nil {
 		return err
 	}
-	authHeader := c.Request().Header.Get("Authorization")
+	authHeader := ctx.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	request.UserId, err = helper.GetUserDataFromToken(tokenString)
 	if err != nil {
 		return err
 	}
 
-	request.Id, err = strconv.Atoi(c.Param("photoId"))
+	request.Id, err = strconv.Atoi(ctx.Param("photoId"))
 	if err != nil {
 		return err
 	}
 
-	photoResponse, err := controller.Usecase.UpdatePhoto(c.Request().Context(), request)
+	photoResponse, err := controller.Usecase.UpdatePhoto(ctx.Request().Context(), request)
 	if err != nil {
 		return err
 	}
@@ -110,16 +110,16 @@ func (controller *PhotoControllerImpl) UpdatePhoto(c echo.Context) error {
 		Data:    photoResponse,
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *PhotoControllerImpl) DeletePhoto(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("photoId"))
+func (controller *PhotoControllerImpl) DeletePhoto(ctx echo.Context) error {
+	id, err := strconv.Atoi(ctx.Param("photoId"))
 	if err != nil {
 		return err
 	}
 
-	err = controller.Usecase.DeletePhoto(c.Request().Context(), id)
+	err = controller.Usecase.DeletePhoto(ctx.Request().Context(), id)
 	if err != nil {
 		return err
 	}
@@ -129,5 +129,5 @@ func (controller *PhotoControllerImpl) DeletePhoto(c echo.Context) error {
 		Message: "Your photo has been successfully deleted",
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }

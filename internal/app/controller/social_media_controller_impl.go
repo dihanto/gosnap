@@ -27,8 +27,8 @@ func NewSocialMediaController(usecase usecase.SocialMediaUsecase, route *echo.Ec
 	controller.route(route)
 	return controller
 }
-func (socialMediaControllerImpl *SocialMediaControllerImpl) route(e *echo.Echo) {
-	socialMediasGroup := e.Group("/socialmedias")
+func (socialMediaControllerImpl *SocialMediaControllerImpl) route(echo *echo.Echo) {
+	socialMediasGroup := echo.Group("/socialmedias")
 	socialMediasGroup.Use(middleware.Auth)
 	socialMediasGroup.POST("", socialMediaControllerImpl.PostSocialMedia)
 	socialMediasGroup.GET("", socialMediaControllerImpl.GetSocialMedia)
@@ -36,21 +36,21 @@ func (socialMediaControllerImpl *SocialMediaControllerImpl) route(e *echo.Echo) 
 	socialMediasGroup.DELETE("/:socialMediaId", socialMediaControllerImpl.DeleteSocialMedia)
 }
 
-func (controller *SocialMediaControllerImpl) PostSocialMedia(c echo.Context) error {
+func (controller *SocialMediaControllerImpl) PostSocialMedia(ctx echo.Context) error {
 
 	request := request.SocialMedia{}
-	err := json.NewDecoder(c.Request().Body).Decode(&request)
+	err := json.NewDecoder(ctx.Request().Body).Decode(&request)
 	if err != nil {
 		return err
 	}
-	authHeader := c.Request().Header.Get("Authorization")
+	authHeader := ctx.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	request.UserId, err = helper.GetUserDataFromToken(tokenString)
 	if err != nil {
 		return err
 	}
 
-	socialMediaResponse, err := controller.Usecase.PostSocialMedia(c.Request().Context(), request)
+	socialMediaResponse, err := controller.Usecase.PostSocialMedia(ctx.Request().Context(), request)
 	if err != nil {
 		return err
 	}
@@ -61,11 +61,11 @@ func (controller *SocialMediaControllerImpl) PostSocialMedia(c echo.Context) err
 		Data:    socialMediaResponse,
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *SocialMediaControllerImpl) GetSocialMedia(c echo.Context) error {
-	socialMediaResponse, err := controller.Usecase.GetSocialMedia(c.Request().Context())
+func (controller *SocialMediaControllerImpl) GetSocialMedia(ctx echo.Context) error {
+	socialMediaResponse, err := controller.Usecase.GetSocialMedia(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -76,30 +76,30 @@ func (controller *SocialMediaControllerImpl) GetSocialMedia(c echo.Context) erro
 		Data:    socialMediaResponse,
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *SocialMediaControllerImpl) UpdateSocialMedia(c echo.Context) error {
+func (controller *SocialMediaControllerImpl) UpdateSocialMedia(ctx echo.Context) error {
 
 	request := request.SocialMedia{}
-	err := json.NewDecoder(c.Request().Body).Decode(&request)
+	err := json.NewDecoder(ctx.Request().Body).Decode(&request)
 	if err != nil {
 		return err
 	}
 
-	request.Id, err = strconv.Atoi(c.Param("socialMediaId"))
+	request.Id, err = strconv.Atoi(ctx.Param("socialMediaId"))
 	if err != nil {
 		return err
 	}
 
-	authHeader := c.Request().Header.Get("Authorization")
+	authHeader := ctx.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	request.UserId, err = helper.GetUserDataFromToken(tokenString)
 	if err != nil {
 		return err
 	}
 
-	socialMediaResponse, err := controller.Usecase.UpdateSocialMedia(c.Request().Context(), request)
+	socialMediaResponse, err := controller.Usecase.UpdateSocialMedia(ctx.Request().Context(), request)
 	if err != nil {
 		return err
 	}
@@ -110,16 +110,16 @@ func (controller *SocialMediaControllerImpl) UpdateSocialMedia(c echo.Context) e
 		Data:    socialMediaResponse,
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }
 
-func (controller *SocialMediaControllerImpl) DeleteSocialMedia(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("socialMediaId"))
+func (controller *SocialMediaControllerImpl) DeleteSocialMedia(ctx echo.Context) error {
+	id, err := strconv.Atoi(ctx.Param("socialMediaId"))
 	if err != nil {
 		return err
 	}
 
-	err = controller.Usecase.DeleteSocialMedia(c.Request().Context(), id)
+	err = controller.Usecase.DeleteSocialMedia(ctx.Request().Context(), id)
 	if err != nil {
 		return err
 	}
@@ -129,5 +129,5 @@ func (controller *SocialMediaControllerImpl) DeleteSocialMedia(c echo.Context) e
 		Data:   "Your social media has been successfully deleted",
 	}
 
-	return c.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusOK, webResponse)
 }

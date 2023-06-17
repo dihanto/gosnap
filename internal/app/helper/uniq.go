@@ -11,7 +11,7 @@ import (
 func ValidateEmailUniq(field validator.FieldLevel) bool {
 	value := field.Field().Interface().(string)
 
-	conn, _ := config.NewDb()
+	conn, _ := config.InitDatabaseConnection()
 	defer conn.Close()
 
 	ctx := context.Background()
@@ -40,7 +40,7 @@ func ValidateEmailUniq(field validator.FieldLevel) bool {
 func ValidateUsernameUniq(field validator.FieldLevel) bool {
 	value := field.Field().Interface().(string)
 
-	conn, _ := config.NewDb()
+	conn, _ := config.InitDatabaseConnection()
 	defer conn.Close()
 
 	query := "select username from users"

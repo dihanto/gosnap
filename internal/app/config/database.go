@@ -8,9 +8,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewDb() (db *sql.DB, err error) {
+func InitDatabaseConnection() (db *sql.DB, err error) {
 
-	ViperReadConfig()
+	InitLoadConfiguration()
 	host := viper.GetString("postgres.host")
 	port := viper.GetString("postgres.port")
 	user := viper.GetString("postgres.user")
@@ -21,8 +21,8 @@ func NewDb() (db *sql.DB, err error) {
 	maxIdleConn := viper.GetInt("database.maxIdleConn")
 	maxOpenConn := viper.GetInt("database.maxOpenConn")
 
-	connStr := "host=" + host + " port=" + port + " user=" + user + " password=" + password + " dbname=" + dbname + " sslmode=disable"
-	db, err = sql.Open("postgres", connStr)
+	connString := "host=" + host + " port=" + port + " user=" + user + " password=" + password + " dbname=" + dbname + " sslmode=disable"
+	db, err = sql.Open("postgres", connString)
 	if err != nil {
 		return
 	}
