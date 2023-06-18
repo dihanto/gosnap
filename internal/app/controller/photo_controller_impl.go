@@ -63,7 +63,7 @@ func (controller *PhotoControllerImpl) PostPhoto(ctx echo.Context) error {
 		Data:    photoResponse,
 	}
 
-	return ctx.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusCreated, webResponse)
 }
 
 func (controller *PhotoControllerImpl) GetPhoto(ctx echo.Context) error {

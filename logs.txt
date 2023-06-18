@@ -1,0 +1,43 @@
+{"time":"2023-06-17T19:40:16.9379798+07:00","level":"INFO","prefix":"-","file":"main.go","line":"42","message":"REQUEST: uri: /users/login, status: 200\n"}
+{"time":"2023-06-17T19:40:33.3163392+07:00","level":"INFO","prefix":"-","file":"main.go","line":"42","message":"REQUEST: uri: /photos, status: 401\n"}
+{"time":"2023-06-17T19:41:38.2550916+07:00","level":"INFO","prefix":"-","file":"main.go","line":"43","message":"REQUEST: uri: /photos, status: 401\n"}
+{"time":"2023-06-17T19:42:02.6713779+07:00","level":"INFO","prefix":"-","file":"main.go","line":"43","message":"REQUEST: uri: /users/register, status: 200\n"}
+{"time":"2023-06-17T19:42:40.9089136+07:00","level":"INFO","prefix":"-","file":"main.go","line":"43","message":"REQUEST: uri: /socialmedias, status: 401\n"}
+{"time":"2023-06-17T19:42:47.6063667+07:00","level":"INFO","prefix":"-","file":"main.go","line":"43","message":"REQUEST: uri: /users/login, status: 200\n"}
+{"time":"2023-06-17T19:43:00.9663611+07:00","level":"INFO","prefix":"-","file":"main.go","line":"43","message":"REQUEST: uri: /socialmedias, status: 200\n"}
+{"time":"2023-06-17T19:43:13.9247262+07:00","level":"INFO","prefix":"-","file":"main.go","line":"43","message":"REQUEST: uri: /socialmedias, status: 201\n"}
+{"time":"2023-06-17T19:43:19.8418498+07:00","level":"INFO","prefix":"-","file":"main.go","line":"43","message":"REQUEST: uri: /socialmedias, status: 200\n"}
+{"time":"2023-06-17T20:04:39.5964899+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"31","message":"REQUEST: uri: /users/register, status: 200\n"}
+{"time":"2023-06-18T02:34:27.0896578+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"30","message":"REQUEST: uri: /users/register, status: 200\n"}
+{"time":"2023-06-18T02:42:59.4830765+07:00","level":"INFO","prefix":"-","file":"main.go","line":"36","message":"REQUEST: uri: /users/register, status: 200\n"}
+{"time":"2023-06-18T02:56:37.7849514+07:00","level":"INFO","prefix":"-","file":"main.go","line":"37","message":"REQUEST: uri: /users/register, status: 200\n"}
+{"time":"2023-06-18T02:56:58.4612947+07:00","level":"INFO","prefix":"-","file":"main.go","line":"37","message":"REQUEST: uri: /photos, status: 401\n"}
+{"time":"2023-06-18T02:58:03.6153596+07:00","level":"INFO","prefix":"-","file":"main.go","line":"37","message":"REQUEST: uri: /users/login, status: 200\n"}
+{"time":"2023-06-18T02:58:24.4571646+07:00","level":"INFO","prefix":"-","file":"main.go","line":"37","message":"REQUEST: uri: /comments/199, status: 200\n"}
+{"time":"2023-06-18T03:03:37.9922141+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /photos, status: 201\n"}
+{"time":"2023-06-18T03:03:49.8403317+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /socialmedias, status: 201\n"}
+{"time":"2023-06-18T03:03:54.9933805+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /socialmedias, status: 200\n"}
+{"time":"2023-06-18T03:04:04.4774277+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /comments, status: 401\n"}
+{"time":"2023-06-18T03:16:50.8547729+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /comments/1, status: 401\n"}
+{"time":"2023-06-18T03:17:12.0803272+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /comments/1, status: 200\n"}
+{"time":"2023-06-18T03:17:18.6108665+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /comments/167, status: 200\n"}
+{"time":"2023-06-18T08:54:29.6616511+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /users/login, status: 200\n"}
+{"time":"2023-06-18T08:55:01.1129774+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /photos, status: 401\n"}
+{"time":"2023-06-18T08:59:12.5555589+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /users/login, status: 200\n"}
+{"time":"2023-06-18T09:22:17.7239013+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /comments/167, status: 200\n"}
+{"time":"2023-06-18T09:23:14.2668259+07:00","level":"INFO","prefix":"-","file":"middleware.go","line":"24","message":"REQUEST: uri: /comments/167, status: 200\n"}
+method=POST, uri=/users/login, status=400
+method=POST, uri=/photos, status=401
+method=POST, uri=/users/register, status=400
+method=PUT, uri=/photos/123, status=401
+method=PUT, uri=/comments/12, status=401
+method=PUT, uri=/socialmedias/12, status=401
+method=PUT, uri=/photos/123, status=401
+method=POST, uri=/users/login, status=400
+method=POST, uri=/users/login, status=200
+method=PUT, uri=/photos/123, status=404
+2023-06-18T09:40:32+07:00, method=PUT, uri=/photos/123, status=404, latenc7=82.2943ms
+2023-06-18T09:41:02+07:00, method=POST, uri=/users/register, status=400, latenc7=180.5557ms
+2023-06-18T09:41:19+07:00, method=POST, uri=/users/login, status=200, latenc7=234.7934ms
+2023-06-18T09:41:43+07:00, method=GET, uri=/photos, status=200, latenc7=23.2305ms
+2023-06-18T09:44:47+07:00, method=POST, uri=/users/register, status=400, latency=362.9037ms

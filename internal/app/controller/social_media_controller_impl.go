@@ -61,7 +61,7 @@ func (controller *SocialMediaControllerImpl) PostSocialMedia(ctx echo.Context) e
 		Data:    socialMediaResponse,
 	}
 
-	return ctx.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusCreated, webResponse)
 }
 
 func (controller *SocialMediaControllerImpl) GetSocialMedia(ctx echo.Context) error {

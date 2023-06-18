@@ -61,7 +61,7 @@ func (controller *CommentControllerImpl) PostComment(ctx echo.Context) error {
 		Data:    commentResponse,
 	}
 
-	return ctx.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusCreated, webResponse)
 }
 
 func (controller *CommentControllerImpl) GetComment(ctx echo.Context) error {

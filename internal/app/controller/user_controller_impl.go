@@ -56,7 +56,7 @@ func (controller *UserControllerImpl) UserRegister(ctx echo.Context) error {
 		Data:    userResponse,
 	}
 
-	return ctx.JSON(http.StatusOK, webResponse)
+	return ctx.JSON(http.StatusCreated, webResponse)
 }
 
 func (controller *UserControllerImpl) UserLogin(ctx echo.Context) error {

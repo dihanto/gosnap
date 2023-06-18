@@ -5,6 +5,7 @@ import (
 	"github.com/dihanto/gosnap/internal/app/controller"
 	"github.com/dihanto/gosnap/internal/app/exception"
 	"github.com/dihanto/gosnap/internal/app/helper"
+	"github.com/dihanto/gosnap/internal/app/middleware"
 	"github.com/dihanto/gosnap/internal/app/repository"
 	"github.com/dihanto/gosnap/internal/app/usecase"
 	"github.com/go-playground/validator/v10"
@@ -19,8 +20,12 @@ func main() {
 	serverPort := viper.GetString("server.port")
 	usecaseTimeout := viper.GetInt("usecase.timeout")
 
-	echo := echo.New()
-	echo.HTTPErrorHandler = exception.ErrorHandler
+	router := echo.New()
+	router.HTTPErrorHandler = exception.ErrorHandler
+
+	logFile := config.InitLogFile()
+	defer logFile.Close()
+	middleware.SnapLogger(router, logFile)
 
 	databaseConnection, _ := config.InitDatabaseConnection()
 	validate := validator.New()
@@ -30,27 +35,27 @@ func main() {
 	{
 		userRepository := repository.NewUserRepository()
 		userUsecase := usecase.NewUserUsecase(userRepository, databaseConnection, validate, usecaseTimeout)
-		_ = controller.NewUserController(userUsecase, echo)
+		controller.NewUserController(userUsecase, router)
 	}
 
 	{
 		photoRepository := repository.NewPhotoRepository()
 		photoUsecase := usecase.NewPhotoUsecase(photoRepository, databaseConnection, validate, usecaseTimeout)
-		_ = controller.NewPhotoController(photoUsecase, echo)
+		controller.NewPhotoController(photoUsecase, router)
 	}
 
 	{
 		commentRepository := repository.NewCommentRepository()
 		commentUsecase := usecase.NewCommentUsecase(commentRepository, databaseConnection, validate, usecaseTimeout)
-		_ = controller.NewCommentController(commentUsecase, echo)
+		controller.NewCommentController(commentUsecase, router)
 	}
 
 	{
 		socialMediaRepository := repository.NewSocialMediaRepository()
 		socialMediaUsecase := usecase.NewSocialMediaUsecase(socialMediaRepository, databaseConnection, validate, usecaseTimeout)
-		_ = controller.NewSocialMediaController(socialMediaUsecase, echo)
+		controller.NewSocialMediaController(socialMediaUsecase, router)
 	}
 
-	echo.Start(serverHost + ":" + serverPort)
+	router.Start(serverHost + ":" + serverPort)
 
 }
