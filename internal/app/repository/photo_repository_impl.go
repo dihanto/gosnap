@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dihanto/gosnap/model/domain"
+	"github.com/google/uuid"
 )
 
 type PhotoRepositoryImpl struct {
@@ -87,4 +88,39 @@ func (repository *PhotoRepositoryImpl) DeletePhoto(ctx context.Context, tx *sql.
 	}
 
 	return nil
+}
+
+func (repository *PhotoRepositoryImpl) LikePhoto(ctx context.Context, tx *sql.Tx, id int, userId uuid.UUID) (domain.Photo, error) {
+	query := "UPDATE photos SET likes=likes+1 WHERE id=$1"
+	_, err := tx.ExecContext(ctx, query, id)
+	if err != nil {
+		return domain.Photo{}, err
+	}
+	queryLike := "INSERT INTO like_details (photo_id, user_id) VALUES ($1, $2)"
+	_, err = tx.ExecContext(ctx, queryLike, id, userId)
+	if err != nil {
+		return domain.Photo{}, err
+	}
+	queryResult := "SELECT title, photo_url, likes FROM photos WHERE id=$1"
+	rows, err := tx.QueryContext(ctx, queryResult, id)
+	if err != nil {
+		return domain.Photo{}, err
+	}
+	defer rows.Close()
+
+	var photo domain.Photo
+	if rows.Next() {
+		err = rows.Scan(&photo.Title, &photo.PhotoUrl, &photo.Likes)
+		if err != nil {
+			return domain.Photo{}, err
+		}
+	}
+	photo.Id = id
+
+	return photo, err
+
+}
+
+func (repository *PhotoRepositoryImpl) UnLikePhoto(ctx context.Context, tx *sql.Tx, id int, userId uuid.UUID) (domain.Photo, error) {
+	panic("not implemented") // TODO: Implement
 }

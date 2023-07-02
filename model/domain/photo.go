@@ -7,6 +7,7 @@ type Photo struct {
 	Title     string
 	Caption   string
 	PhotoUrl  string
+	Likes     int
 	UserId    uuid.UUID
 	CreatedAt int32
 	UpdatedAt int32

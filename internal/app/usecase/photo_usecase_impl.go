@@ -11,6 +11,7 @@ import (
 	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type PhotoUsecaseImpl struct {
@@ -243,4 +244,50 @@ func (usecase *PhotoUsecaseImpl) DeletePhoto(ctx context.Context, id int) error 
 	}
 
 	return nil
+}
+
+func (usecase *PhotoUsecaseImpl) LikePhoto(ctx context.Context, id int, userId uuid.UUID) (response.LikePhoto, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
+	tx, err := usecase.DB.Begin()
+	if err != nil {
+		return response.LikePhoto{}, err
+	}
+	defer func() {
+		if recover := recover(); recover != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction", rollbackErr)
+			}
+			panic(recover)
+		}
+	}()
+
+	photo, err := usecase.Repository.LikePhoto(ctx, tx, id, userId)
+	if err != nil {
+		return response.LikePhoto{}, err
+	}
+
+	photoResponse := response.LikePhoto{
+		Id:       photo.Id,
+		Title:    photo.Title,
+		PhotoUrl: photo.PhotoUrl,
+		Likes:    photo.Likes,
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
+		}
+		return response.LikePhoto{}, err
+	}
+
+	return photoResponse, nil
+}
+
+func (usecase *PhotoUsecaseImpl) UnlikePhoto(ctx context.Context, id int) error {
+	panic("not implemented") // TODO: Implement
 }

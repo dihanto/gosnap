@@ -24,6 +24,7 @@ type UpdatePhoto struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
 type GetPhoto struct {
 	Id        int       `json:"id"`
 	Title     string    `json:"title"`
@@ -33,6 +34,13 @@ type GetPhoto struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	User      User      `json:"user"`
+}
+
+type LikePhoto struct {
+	Id       int    `json:"id"`
+	Title    string `json:"title"`
+	PhotoUrl string `json:"photoUrl"`
+	Likes    int    `json:"likes"`
 }
 
 type User struct {
