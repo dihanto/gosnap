@@ -6,6 +6,7 @@ import (
 
 	"github.com/dihanto/gosnap/internal/app/config"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 func ValidateEmailUniq(field validator.FieldLevel) bool {
@@ -15,7 +16,7 @@ func ValidateEmailUniq(field validator.FieldLevel) bool {
 	defer conn.Close()
 
 	ctx := context.Background()
-	query := "select email from users"
+	query := "SELECT email FROM users"
 	rows, err := conn.QueryContext(ctx, query)
 	if err != nil {
 		log.Println(err)
@@ -43,7 +44,7 @@ func ValidateUsernameUniq(field validator.FieldLevel) bool {
 	conn, _ := config.InitDatabaseConnection()
 	defer conn.Close()
 
-	query := "select username from users"
+	query := "SELECT username FFROM users"
 	ctx := context.Background()
 	rows, err := conn.QueryContext(ctx, query)
 	if err != nil {
@@ -61,5 +62,32 @@ func ValidateUsernameUniq(field validator.FieldLevel) bool {
 			return false
 		}
 	}
+	return true
+}
+
+func ValidateOneUserOneLike(field validator.FieldLevel) bool {
+	value := field.Field().Interface().(uuid.UUID)
+
+	conn, _ := config.InitDatabaseConnection()
+	defer conn.Close()
+
+	query := "SELECT user_id FROM like_details"
+	rows, err := conn.QueryContext(context.Background(), query)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer rows.Close()
+
+	var userId uuid.UUID
+	for rows.Next() {
+		err = rows.Scan(&userId)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		if value == userId {
+			return false
+		}
+	}
+
 	return true
 }

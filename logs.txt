@@ -56,3 +56,15 @@ method=PUT, uri=/photos/123, status=404
 2023-07-02T21:16:48+07:00, method=POST, uri=/photos/1/like, status=500, latency=10.1326745s
 2023-07-02T21:17:10+07:00, method=POST, uri=/photos, status=500, latency=58.9912ms
 2023-07-02T21:23:16+07:00, method=POST, uri=/photos/1/like, status=500, latency=92.5796ms
+2023-07-02T21:25:29+07:00, method=POST, uri=/photos/1/like, status=200, latency=93.1987ms
+2023-07-02T21:26:02+07:00, method=POST, uri=/users/register, status=201, latency=446.6594ms
+2023-07-02T21:26:10+07:00, method=POST, uri=/users/login, status=200, latency=206.4729ms
+2023-07-02T21:26:47+07:00, method=POST, uri=/photos/1/like, status=500, latency=0s
+2023-07-02T21:27:01+07:00, method=POST, uri=/photos/1/like, status=500, latency=0s
+2023-07-02T21:27:33+07:00, method=POST, uri=/photos/1/like, status=200, latency=6.9848ms
+2023-07-02T21:27:59+07:00, method=POST, uri=/users/register, status=400, latency=263.6941ms
+2023-07-02T21:28:06+07:00, method=POST, uri=/users/register, status=201, latency=367.262ms
+2023-07-02T21:28:14+07:00, method=POST, uri=/users/login, status=200, latency=214.5741ms
+2023-07-02T21:28:27+07:00, method=POST, uri=/photos/1/like, status=200, latency=9.761ms
+2023-07-03T21:10:34+07:00, method=POST, uri=/users/login, status=200, latency=147.9786ms
+2023-07-03T21:10:56+07:00, method=POST, uri=/photos/1/like, status=200, latency=35.6686ms

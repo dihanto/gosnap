@@ -250,6 +250,11 @@ func (usecase *PhotoUsecaseImpl) LikePhoto(ctx context.Context, id int, userId u
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
+	err := usecase.Validate.Var(userId, "required,likes")
+	if err != nil {
+		return response.LikePhoto{}, err
+	}
+
 	tx, err := usecase.DB.Begin()
 	if err != nil {
 		return response.LikePhoto{}, err
