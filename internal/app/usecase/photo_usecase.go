@@ -14,5 +14,5 @@ type PhotoUsecase interface {
 	UpdatePhoto(ctx context.Context, request request.Photo) (response.UpdatePhoto, error)
 	DeletePhoto(ctx context.Context, id int) error
 	LikePhoto(ctx context.Context, id int, userId uuid.UUID) (response.LikePhoto, error)
-	UnlikePhoto(ctx context.Context, id int) error
+	UnlikePhoto(ctx context.Context, id int, userId uuid.UUID) (response.UnLikePhoto, error)
 }

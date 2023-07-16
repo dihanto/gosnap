@@ -42,6 +42,12 @@ type LikePhoto struct {
 	PhotoUrl string `json:"photoUrl"`
 	Likes    int    `json:"likes"`
 }
+type UnLikePhoto struct {
+	Id       int    `json:"id"`
+	Title    string `json:"title"`
+	PhotoUrl string `json:"photoUrl"`
+	Likes    int    `json:"likes"`
+}
 
 type User struct {
 	Username string `json:"username"`

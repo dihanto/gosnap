@@ -122,5 +122,33 @@ func (repository *PhotoRepositoryImpl) LikePhoto(ctx context.Context, tx *sql.Tx
 }
 
 func (repository *PhotoRepositoryImpl) UnLikePhoto(ctx context.Context, tx *sql.Tx, id int, userId uuid.UUID) (domain.Photo, error) {
-	panic("not implemented") // TODO: Implement
+	query := "UPDATE photos SET likes=likes-1 WHERE id=$1"
+	_, err := tx.ExecContext(ctx, query, id)
+	if err != nil {
+		return domain.Photo{}, err
+	}
+
+	queryLike := "DELETE from like_details WHERE user_id=$1"
+	_, err = tx.ExecContext(ctx, queryLike, userId)
+	if err != nil {
+		return domain.Photo{}, err
+	}
+
+	queryResult := "SELECT title, photo_url, likes FROM photos WHERE id=$1"
+	rows, err := tx.QueryContext(ctx, queryResult, id)
+	if err != nil {
+		return domain.Photo{}, err
+	}
+	defer rows.Close()
+
+	var photo domain.Photo
+	if rows.Next() {
+		err = rows.Scan(&photo.Title, &photo.PhotoUrl, &photo.Likes)
+		if err != nil {
+			return domain.Photo{}, err
+		}
+	}
+	photo.Id = id
+
+	return photo, err
 }

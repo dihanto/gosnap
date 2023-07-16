@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -250,7 +251,9 @@ func (usecase *PhotoUsecaseImpl) LikePhoto(ctx context.Context, id int, userId u
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	err := usecase.Validate.Var(userId, "required,likes")
+	idString := strconv.Itoa(id)
+	err := usecase.Validate.Var(userId, "required,likes="+idString)
+
 	if err != nil {
 		return response.LikePhoto{}, err
 	}
@@ -293,6 +296,49 @@ func (usecase *PhotoUsecaseImpl) LikePhoto(ctx context.Context, id int, userId u
 	return photoResponse, nil
 }
 
-func (usecase *PhotoUsecaseImpl) UnlikePhoto(ctx context.Context, id int) error {
-	panic("not implemented") // TODO: Implement
+func (usecase *PhotoUsecaseImpl) UnlikePhoto(ctx context.Context, id int, userId uuid.UUID) (response.UnLikePhoto, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
+	err := usecase.Validate.Var(userId, "required")
+	if err != nil {
+		return response.UnLikePhoto{}, err
+	}
+
+	tx, err := usecase.DB.Begin()
+	if err != nil {
+		return response.UnLikePhoto{}, err
+	}
+	defer func() {
+		if recover := recover(); recover != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction", rollbackErr)
+			}
+			panic(recover)
+		}
+	}()
+
+	photo, err := usecase.Repository.UnLikePhoto(ctx, tx, id, userId)
+	if err != nil {
+		return response.UnLikePhoto{}, err
+	}
+
+	photoResponse := response.UnLikePhoto{
+		Id:       photo.Id,
+		Title:    photo.Title,
+		PhotoUrl: photo.PhotoUrl,
+		Likes:    photo.Likes,
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
+		}
+		return response.UnLikePhoto{}, err
+	}
+
+	return photoResponse, nil
 }
