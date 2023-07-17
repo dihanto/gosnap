@@ -67,12 +67,13 @@ func ValidateUsernameUniq(field validator.FieldLevel) bool {
 
 func ValidateOneUserOneLike(field validator.FieldLevel) bool {
 	value := field.Field().Interface().(uuid.UUID)
+	id := field.Param()
 
 	conn, _ := config.InitDatabaseConnection()
 	defer conn.Close()
 
-	query := "SELECT user_id FROM like_details"
-	rows, err := conn.QueryContext(context.Background(), query)
+	query := "SELECT user_id FROM like_details WHERE photo_id=$1"
+	rows, err := conn.QueryContext(context.Background(), query, id)
 	if err != nil {
 		log.Fatalln(err)
 	}
