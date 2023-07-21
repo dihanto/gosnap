@@ -17,6 +17,7 @@ func NewPhotoRepository() PhotoRepository {
 	return &PhotoRepositoryImpl{}
 }
 
+// PostPhoto is a method to create a new photo entry in the database.
 func (repository *PhotoRepositoryImpl) PostPhoto(ctx context.Context, tx *sql.Tx, photo domain.Photo) (domain.Photo, error) {
 	photo.CreatedAt = int32(time.Now().Unix())
 
@@ -28,17 +29,17 @@ func (repository *PhotoRepositoryImpl) PostPhoto(ctx context.Context, tx *sql.Tx
 	}
 
 	return photo, nil
-
 }
 
+// GetPhoto is a method to retrieve all photo entries and their associated users from the database.
 func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context, tx *sql.Tx) ([]domain.Photo, []domain.User, error) {
-
 	query := "SELECT photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email FROM photos JOIN users ON photos.user_id = users.id WHERE photos.deleted_at IS NULL;"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
 		return []domain.Photo{}, []domain.User{}, err
 	}
 	defer rows.Close()
+
 	var users []domain.User
 	var photos []domain.Photo
 	for rows.Next() {
@@ -56,6 +57,7 @@ func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context, tx *sql.Tx)
 	return photos, users, nil
 }
 
+// UpdatePhoto is a method to update a photo entry in the database.
 func (repository *PhotoRepositoryImpl) UpdatePhoto(ctx context.Context, tx *sql.Tx, photo domain.Photo) (domain.Photo, error) {
 	photo.UpdatedAt = int32(time.Now().Unix())
 
@@ -68,9 +70,9 @@ func (repository *PhotoRepositoryImpl) UpdatePhoto(ctx context.Context, tx *sql.
 	}
 
 	return photo, nil
-
 }
 
+// DeletePhoto is a method to "soft delete" a photo entry by setting the deleted_at field in the database.
 func (repository *PhotoRepositoryImpl) DeletePhoto(ctx context.Context, tx *sql.Tx, id int) error {
 	deleteTime := int32(time.Now().Unix())
 
@@ -90,6 +92,7 @@ func (repository *PhotoRepositoryImpl) DeletePhoto(ctx context.Context, tx *sql.
 	return nil
 }
 
+// LikePhoto is a method to add a like to a photo entry in the database.
 func (repository *PhotoRepositoryImpl) LikePhoto(ctx context.Context, tx *sql.Tx, id int, userId uuid.UUID) (domain.Photo, error) {
 	query := "UPDATE photos SET likes=likes+1 WHERE id=$1"
 	_, err := tx.ExecContext(ctx, query, id)
@@ -118,9 +121,9 @@ func (repository *PhotoRepositoryImpl) LikePhoto(ctx context.Context, tx *sql.Tx
 	photo.Id = id
 
 	return photo, err
-
 }
 
+// UnLikePhoto is a method to remove a like from a photo entry in the database.
 func (repository *PhotoRepositoryImpl) UnLikePhoto(ctx context.Context, tx *sql.Tx, id int, userId uuid.UUID) (domain.Photo, error) {
 	query := "UPDATE photos SET likes=likes-1 WHERE id=$1"
 	_, err := tx.ExecContext(ctx, query, id)

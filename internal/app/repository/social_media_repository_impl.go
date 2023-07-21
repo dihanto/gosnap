@@ -15,6 +15,8 @@ type SocialMediaRepositoryImpl struct {
 func NewSocialMediaRepository() SocialMediaRepository {
 	return &SocialMediaRepositoryImpl{}
 }
+
+// PostSocialMedia is a method to create a new social media entry in the database.
 func (repository *SocialMediaRepositoryImpl) PostSocialMedia(ctx context.Context, tx *sql.Tx, socialMedia domain.SocialMedia) (domain.SocialMedia, error) {
 	socialMedia.CreatedAt = int32(time.Now().Unix())
 
@@ -26,9 +28,9 @@ func (repository *SocialMediaRepositoryImpl) PostSocialMedia(ctx context.Context
 	}
 
 	return socialMedia, nil
-
 }
 
+// GetSocialMedia is a method to retrieve all social media entries and their associated users from the database.
 func (repository *SocialMediaRepositoryImpl) GetSocialMedia(ctx context.Context, tx *sql.Tx) ([]domain.SocialMedia, []domain.User, error) {
 	query := "SELECT social_medias.id, social_medias.name, social_medias.social_media_url, social_medias.user_id, social_medias.created_at, social_medias.updated_at, users.id, users.username FROM social_medias JOIN users ON social_medias.user_id = users.id WHERE social_medias.deleted_at IS NULL;"
 	rows, err := tx.QueryContext(ctx, query)
@@ -54,6 +56,7 @@ func (repository *SocialMediaRepositoryImpl) GetSocialMedia(ctx context.Context,
 	return socialMedias, users, nil
 }
 
+// UpdateSocialMedia is a method to update a social media entry in the database.
 func (repository *SocialMediaRepositoryImpl) UpdateSocialMedia(ctx context.Context, tx *sql.Tx, socialMedia domain.SocialMedia) (domain.SocialMedia, error) {
 	socialMedia.UpdatedAt = int32(time.Now().Unix())
 
@@ -66,9 +69,9 @@ func (repository *SocialMediaRepositoryImpl) UpdateSocialMedia(ctx context.Conte
 	}
 
 	return socialMedia, nil
-
 }
 
+// DeleteSocialMedia is a method to "soft delete" a social media entry by setting the deleted_at field in the database.
 func (repository *SocialMediaRepositoryImpl) DeleteSocialMedia(ctx context.Context, tx *sql.Tx, id int) error {
 	deleteTime := int32(time.Now().Unix())
 

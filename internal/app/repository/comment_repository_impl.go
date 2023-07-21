@@ -15,8 +15,9 @@ type CommentRepositoryImpl struct {
 func NewCommentRepository() CommentRepository {
 	return &CommentRepositoryImpl{}
 }
-func (repository *CommentRepositoryImpl) PostComment(ctx context.Context, tx *sql.Tx, comment domain.Comment) (domain.Comment, error) {
 
+// PostComment is a method to create a new comment entry in the database.
+func (repository *CommentRepositoryImpl) PostComment(ctx context.Context, tx *sql.Tx, comment domain.Comment) (domain.Comment, error) {
 	comment.CreatedAt = int32(time.Now().Unix())
 
 	query := "INSERT INTO comments (message, photo_id, user_id, created_at) VALUES ($1, $2, $3, $4) RETURNING id"
@@ -29,8 +30,8 @@ func (repository *CommentRepositoryImpl) PostComment(ctx context.Context, tx *sq
 	return comment, nil
 }
 
+// GetComment is a method to retrieve all comment entries and their associated users and photos from the database.
 func (repository *CommentRepositoryImpl) GetComment(ctx context.Context, tx *sql.Tx) ([]domain.Comment, []domain.User, []domain.Photo, error) {
-
 	query := "SELECT comments.id, comments.message, comments.photo_id, comments.user_id, comments.created_at, comments.updated_at, users.id, users.email, users.username, photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id FROM comments JOIN photos ON comments.photo_id = photos.id JOIN users ON comments.user_id = users.id WHERE comments.deleted_at IS NULL;"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
@@ -59,6 +60,7 @@ func (repository *CommentRepositoryImpl) GetComment(ctx context.Context, tx *sql
 	return comments, users, photos, nil
 }
 
+// UpdateComment is a method to update a comment entry in the database.
 func (repository *CommentRepositoryImpl) UpdateComment(ctx context.Context, tx *sql.Tx, comment domain.Comment) (domain.Comment, error) {
 	comment.UpdatedAt = int32(time.Now().Unix())
 
@@ -73,8 +75,8 @@ func (repository *CommentRepositoryImpl) UpdateComment(ctx context.Context, tx *
 	return comment, nil
 }
 
+// DeleteComment is a method to "soft delete" a comment entry by setting the deleted_at field in the database.
 func (repository *CommentRepositoryImpl) DeleteComment(ctx context.Context, tx *sql.Tx, id int) error {
-
 	deleteTime := int32(time.Now().Unix())
 
 	query := "UPDATE comments SET deleted_at = $1 WHERE id = $2"

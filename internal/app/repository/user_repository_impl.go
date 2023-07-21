@@ -17,8 +17,9 @@ type UserRepositoryImpl struct {
 func NewUserRepository() UserRepository {
 	return &UserRepositoryImpl{}
 }
-func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error) {
 
+// UserRegister is a method to register a new user in the database.
+func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error) {
 	user.CreatedAt = int32(time.Now().Unix())
 
 	password, err := helper.HashPassword(user.Password)
@@ -35,6 +36,7 @@ func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, tx *sql.
 	return user, nil
 }
 
+// UserLogin is a method to authenticate a user during login.
 func (repository *UserRepositoryImpl) UserLogin(ctx context.Context, tx *sql.Tx, username string, password string) (bool, uuid.UUID, error) {
 	var pwd string
 	var id uuid.UUID
@@ -53,11 +55,10 @@ func (repository *UserRepositoryImpl) UserLogin(ctx context.Context, tx *sql.Tx,
 	}
 
 	return true, id, nil
-
 }
 
+// UserUpdate is a method to update user information in the database.
 func (repository *UserRepositoryImpl) UserUpdate(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error) {
-
 	user.UpdatedAt = int32(time.Now().Unix())
 	query := "UPDATE users SET email=$1, username=$2, updated_at=$3 WHERE id=$4"
 	_, err := tx.ExecContext(ctx, query, user.Email, user.Username, user.UpdatedAt, user.Id)
@@ -82,8 +83,8 @@ func (repository *UserRepositoryImpl) UserUpdate(ctx context.Context, tx *sql.Tx
 	return user, nil
 }
 
+// UserDelete is a method to "soft delete" a user in the database by setting the deleted_at field.
 func (repository *UserRepositoryImpl) UserDelete(ctx context.Context, tx *sql.Tx, id uuid.UUID) error {
-
 	deleteTime := int32(time.Now().Unix())
 
 	query := "UPDATE users SET deleted_at=$1 WHERE id=$2"
@@ -93,5 +94,4 @@ func (repository *UserRepositoryImpl) UserDelete(ctx context.Context, tx *sql.Tx
 	}
 
 	return nil
-
 }
