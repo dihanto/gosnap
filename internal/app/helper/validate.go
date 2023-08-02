@@ -44,7 +44,7 @@ func ValidateUsernameUniq(field validator.FieldLevel) bool {
 	conn, _ := config.InitDatabaseConnection()
 	defer conn.Close()
 
-	query := "SELECT username FFROM users"
+	query := "SELECT username FROM users"
 	ctx := context.Background()
 	rows, err := conn.QueryContext(ctx, query)
 	if err != nil {

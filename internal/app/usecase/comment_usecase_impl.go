@@ -2,8 +2,6 @@ package usecase
 
 import (
 	"context"
-	"database/sql"
-	"log"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -15,15 +13,13 @@ import (
 
 type CommentUsecaseImpl struct {
 	Repository repository.CommentRepository
-	DB         *sql.DB
 	Validate   *validator.Validate
 	Timeout    int
 }
 
-func NewCommentUsecase(repository repository.CommentRepository, db *sql.DB, validate *validator.Validate, timeout int) CommentUsecase {
+func NewCommentUsecase(repository repository.CommentRepository, validate *validator.Validate, timeout int) CommentUsecase {
 	return &CommentUsecaseImpl{
 		Repository: repository,
-		DB:         db,
 		Validate:   validate,
 		Timeout:    timeout,
 	}
@@ -37,37 +33,14 @@ func (usecase *CommentUsecaseImpl) PostComment(ctx context.Context, request requ
 		return response.PostComment{}, err
 	}
 
-	tx, err := usecase.DB.Begin()
-	if err != nil {
-		return response.PostComment{}, err
-	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
-
 	comment := domain.Comment{
 		Message: request.Message,
 		PhotoId: request.PhotoId,
 		UserId:  request.UserId,
 	}
 
-	comment, err = usecase.Repository.PostComment(ctx, tx, comment)
+	comment, err = usecase.Repository.PostComment(ctx, comment)
 	if err != nil {
-		return response.PostComment{}, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
 		return response.PostComment{}, err
 	}
 
@@ -86,21 +59,7 @@ func (usecase *CommentUsecaseImpl) GetComment(ctx context.Context) ([]response.G
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	tx, err := usecase.DB.Begin()
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
-
-	comments, users, photos, err := usecase.Repository.GetComment(ctx, tx)
+	comments, users, photos, err := usecase.Repository.GetComment(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -144,15 +103,6 @@ func (usecase *CommentUsecaseImpl) GetComment(ctx context.Context) ([]response.G
 		commentsResponse = append(commentsResponse, commentResponse)
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
-		return nil, err
-	}
-
 	return commentsResponse, nil
 }
 
@@ -165,27 +115,13 @@ func (usecase *CommentUsecaseImpl) UpdateComment(ctx context.Context, request re
 		return response.UpdateComment{}, err
 	}
 
-	tx, err := usecase.DB.Begin()
-	if err != nil {
-		return response.UpdateComment{}, err
-	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
-
 	comment := domain.Comment{
 		Id:      request.Id,
 		Message: request.Message,
 		UserId:  request.UserId,
 	}
 
-	comment, err = usecase.Repository.UpdateComment(ctx, tx, comment)
+	comment, err = usecase.Repository.UpdateComment(ctx, comment)
 	if err != nil {
 		return response.UpdateComment{}, err
 	}
@@ -198,15 +134,6 @@ func (usecase *CommentUsecaseImpl) UpdateComment(ctx context.Context, request re
 		UpdatedAt: time.Unix(int64(comment.UpdatedAt), 0),
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
-		return response.UpdateComment{}, err
-	}
-
 	return commentResponse, nil
 }
 
@@ -214,31 +141,8 @@ func (usecase *CommentUsecaseImpl) DeleteComment(ctx context.Context, id int) er
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	tx, err := usecase.DB.Begin()
+	err := usecase.Repository.DeleteComment(ctx, id)
 	if err != nil {
-		return err
-	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
-
-	err = usecase.Repository.DeleteComment(ctx, tx, id)
-	if err != nil {
-		return err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
 		return err
 	}
 

@@ -4,34 +4,75 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/dihanto/gosnap/model/domain"
 )
 
 type CommentRepositoryImpl struct {
+	Database *sql.DB
 }
 
-func NewCommentRepository() CommentRepository {
-	return &CommentRepositoryImpl{}
+func NewCommentRepository(database *sql.DB) CommentRepository {
+	return &CommentRepositoryImpl{
+		Database: database,
+	}
 }
 
 // PostComment is a method to create a new comment entry in the database.
-func (repository *CommentRepositoryImpl) PostComment(ctx context.Context, tx *sql.Tx, comment domain.Comment) (domain.Comment, error) {
+func (repository *CommentRepositoryImpl) PostComment(ctx context.Context, comment domain.Comment) (domain.Comment, error) {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return domain.Comment{}, nil
+	}
+	defer func() {
+		if recover := recover(); recover != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(recover)
+		}
+	}()
+
 	comment.CreatedAt = int32(time.Now().Unix())
 
 	query := "INSERT INTO comments (message, photo_id, user_id, created_at) VALUES ($1, $2, $3, $4) RETURNING id"
 	row := tx.QueryRowContext(ctx, query, comment.Message, comment.PhotoId, comment.UserId, comment.CreatedAt)
-	err := row.Scan(&comment.Id)
+	err = row.Scan(&comment.Id)
 	if err != nil {
 		return domain.Comment{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
+		}
+		return domain.Comment{}, nil
 	}
 
 	return comment, nil
 }
 
 // GetComment is a method to retrieve all comment entries and their associated users and photos from the database.
-func (repository *CommentRepositoryImpl) GetComment(ctx context.Context, tx *sql.Tx) ([]domain.Comment, []domain.User, []domain.Photo, error) {
+func (repository *CommentRepositoryImpl) GetComment(ctx context.Context) ([]domain.Comment, []domain.User, []domain.Photo, error) {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return []domain.Comment{}, []domain.User{}, []domain.Photo{}, nil
+	}
+	defer func() {
+		if recover := recover(); recover != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(recover)
+		}
+	}()
+
 	query := "SELECT comments.id, comments.message, comments.photo_id, comments.user_id, comments.created_at, comments.updated_at, users.id, users.email, users.username, photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id FROM comments JOIN photos ON comments.photo_id = photos.id JOIN users ON comments.user_id = users.id WHERE comments.deleted_at IS NULL;"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
@@ -57,26 +98,72 @@ func (repository *CommentRepositoryImpl) GetComment(ctx context.Context, tx *sql
 		photos = append(photos, photo)
 		comments = append(comments, comment)
 	}
+
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
+		}
+		return []domain.Comment{}, []domain.User{}, []domain.Photo{}, nil
+	}
+
 	return comments, users, photos, nil
 }
 
 // UpdateComment is a method to update a comment entry in the database.
-func (repository *CommentRepositoryImpl) UpdateComment(ctx context.Context, tx *sql.Tx, comment domain.Comment) (domain.Comment, error) {
+func (repository *CommentRepositoryImpl) UpdateComment(ctx context.Context, comment domain.Comment) (domain.Comment, error) {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return domain.Comment{}, nil
+	}
+	defer func() {
+		if recover := recover(); recover != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(recover)
+		}
+	}()
 	comment.UpdatedAt = int32(time.Now().Unix())
 
 	query := "UPDATE comments SET message=$1, updated_at=$2, user_id=$3 WHERE id=$4 RETURNING photo_id"
 	row := tx.QueryRowContext(ctx, query, comment.Message, comment.UpdatedAt, comment.UserId, comment.Id)
 
-	err := row.Scan(&comment.PhotoId)
+	err = row.Scan(&comment.PhotoId)
 	if err != nil {
 		return domain.Comment{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
+		}
+		return domain.Comment{}, nil
 	}
 
 	return comment, nil
 }
 
 // DeleteComment is a method to "soft delete" a comment entry by setting the deleted_at field in the database.
-func (repository *CommentRepositoryImpl) DeleteComment(ctx context.Context, tx *sql.Tx, id int) error {
+func (repository *CommentRepositoryImpl) DeleteComment(ctx context.Context, id int) error {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return nil
+	}
+	defer func() {
+		if recover := recover(); recover != nil {
+			rollbackErr := tx.Rollback()
+			if rollbackErr != nil {
+				log.Println("Failed to rollback transaction:", rollbackErr)
+			}
+			panic(recover)
+		}
+	}()
+
 	deleteTime := int32(time.Now().Unix())
 
 	query := "UPDATE comments SET deleted_at = $1 WHERE id = $2"
@@ -90,6 +177,15 @@ func (repository *CommentRepositoryImpl) DeleteComment(ctx context.Context, tx *
 	}
 	if rows == 0 {
 		return errors.New("comment not found")
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			log.Println("Failed to rollback transaction:", rollbackErr)
+		}
+		return nil
 	}
 
 	return nil

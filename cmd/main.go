@@ -46,8 +46,8 @@ func main() {
 	}
 
 	{
-		commentRepository := repository.NewCommentRepository()
-		commentUsecase := usecase.NewCommentUsecase(commentRepository, databaseConnection, validate, usecaseTimeout)
+		commentRepository := repository.NewCommentRepository(databaseConnection)
+		commentUsecase := usecase.NewCommentUsecase(commentRepository, validate, usecaseTimeout)
 		controller.NewCommentController(commentUsecase, router)
 	}
 

@@ -30,13 +30,13 @@ func NewUserUsecase(userRepository repository.UserRepository, db *sql.DB, valida
 	}
 }
 func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request request.UserRegister) (response.UserRegister, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
-	defer cancel()
-
 	err := usecase.Validate.Struct(request)
 	if err != nil {
 		return response.UserRegister{}, err
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
 
 	tx, err := usecase.DB.Begin()
 	if err != nil {

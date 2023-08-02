@@ -90,3 +90,14 @@ method=PUT, uri=/photos/123, status=404
 2023-07-16T17:23:10+07:00, method=POST, uri=/photos/2/like, status=400, latency=61.5616ms
 2023-07-16T17:23:15+07:00, method=POST, uri=/photos/6/like, status=500, latency=88.8964ms
 2023-07-16T17:23:33+07:00, method=POST, uri=/photos/10/like, status=500, latency=175.9063ms
+2023-07-22T10:25:11+07:00, method=POST, uri=/users/login, status=200, latency=131.4809ms
+2023-07-22T10:32:47+07:00, method=POST, uri=/users/register, status=400, latency=357.4352ms
+2023-08-02T16:27:28+07:00, method=POST, uri=/users/login, status=200, latency=372.4709ms
+2023-08-02T16:30:12+07:00, method=DELETE, uri=/comments/1, status=401, latency=0s
+2023-08-02T16:32:02+07:00, method=POST, uri=/comments, status=201, latency=65.4653ms
+2023-08-02T16:32:06+07:00, method=GET, uri=/comments, status=200, latency=7.2439ms
+2023-08-02T16:32:23+07:00, method=POST, uri=/comments, status=201, latency=4.163ms
+2023-08-02T16:32:25+07:00, method=GET, uri=/comments, status=200, latency=2.1353ms
+2023-08-02T16:32:31+07:00, method=PUT, uri=/comments/1, status=200, latency=3.1539ms
+2023-08-02T16:32:35+07:00, method=DELETE, uri=/comments/1, status=401, latency=0s
+2023-08-02T16:32:42+07:00, method=DELETE, uri=/comments/1, status=200, latency=5.3245ms
