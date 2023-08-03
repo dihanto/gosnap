@@ -12,14 +12,23 @@ import (
 )
 
 type UserRepositoryImpl struct {
+	Database *sql.DB
 }
 
-func NewUserRepository() UserRepository {
-	return &UserRepositoryImpl{}
+func NewUserRepository(database *sql.DB) UserRepository {
+	return &UserRepositoryImpl{
+		Database: database,
+	}
 }
 
 // UserRegister is a method to register a new user in the database.
-func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error) {
+func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, user domain.User) (domain.User, error) {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return domain.User{}, err
+	}
+	defer helper.CommitOrRollback(tx, &err)
+
 	user.CreatedAt = int32(time.Now().Unix())
 
 	password, err := helper.HashPassword(user.Password)
@@ -37,11 +46,17 @@ func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, tx *sql.
 }
 
 // UserLogin is a method to authenticate a user during login.
-func (repository *UserRepositoryImpl) UserLogin(ctx context.Context, tx *sql.Tx, username string, password string) (bool, uuid.UUID, error) {
+func (repository *UserRepositoryImpl) UserLogin(ctx context.Context, username string, password string) (bool, uuid.UUID, error) {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return false, uuid.Nil, err
+	}
+	defer helper.CommitOrRollback(tx, &err)
+
 	var pwd string
 	var id uuid.UUID
 	query := "SELECT password, id FROM users WHERE username = $1;"
-	err := tx.QueryRowContext(ctx, query, username).Scan(&pwd, &id)
+	err = tx.QueryRowContext(ctx, query, username).Scan(&pwd, &id)
 	if err == sql.ErrNoRows {
 		return false, uuid.Nil, err
 	}
@@ -58,10 +73,16 @@ func (repository *UserRepositoryImpl) UserLogin(ctx context.Context, tx *sql.Tx,
 }
 
 // UserUpdate is a method to update user information in the database.
-func (repository *UserRepositoryImpl) UserUpdate(ctx context.Context, tx *sql.Tx, user domain.User) (domain.User, error) {
+func (repository *UserRepositoryImpl) UserUpdate(ctx context.Context, user domain.User) (domain.User, error) {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return domain.User{}, nil
+	}
+	defer helper.CommitOrRollback(tx, &err)
+
 	user.UpdatedAt = int32(time.Now().Unix())
 	query := "UPDATE users SET email=$1, username=$2, updated_at=$3 WHERE id=$4"
-	_, err := tx.ExecContext(ctx, query, user.Email, user.Username, user.UpdatedAt, user.Id)
+	_, err = tx.ExecContext(ctx, query, user.Email, user.Username, user.UpdatedAt, user.Id)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -84,11 +105,17 @@ func (repository *UserRepositoryImpl) UserUpdate(ctx context.Context, tx *sql.Tx
 }
 
 // UserDelete is a method to "soft delete" a user in the database by setting the deleted_at field.
-func (repository *UserRepositoryImpl) UserDelete(ctx context.Context, tx *sql.Tx, id uuid.UUID) error {
+func (repository *UserRepositoryImpl) UserDelete(ctx context.Context, id uuid.UUID) error {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return err
+	}
+	defer helper.CommitOrRollback(tx, &err)
+
 	deleteTime := int32(time.Now().Unix())
 
 	query := "UPDATE users SET deleted_at=$1 WHERE id=$2"
-	_, err := tx.ExecContext(ctx, query, deleteTime, id)
+	_, err = tx.ExecContext(ctx, query, deleteTime, id)
 	if err != nil {
 		return errors.New(err.Error())
 	}

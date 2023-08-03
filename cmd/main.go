@@ -34,8 +34,8 @@ func main() {
 	validate.RegisterValidation("likes", helper.ValidateOneUserOneLike)
 
 	{
-		userRepository := repository.NewUserRepository()
-		userUsecase := usecase.NewUserUsecase(userRepository, databaseConnection, validate, usecaseTimeout)
+		userRepository := repository.NewUserRepository(databaseConnection)
+		userUsecase := usecase.NewUserUsecase(userRepository, validate, usecaseTimeout)
 		controller.NewUserController(userUsecase, router)
 	}
 

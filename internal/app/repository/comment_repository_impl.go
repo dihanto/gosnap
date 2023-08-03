@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"time"
 
+	"github.com/dihanto/gosnap/internal/app/helper"
 	"github.com/dihanto/gosnap/model/domain"
 )
 
@@ -26,15 +26,7 @@ func (repository *CommentRepositoryImpl) PostComment(ctx context.Context, commen
 	if err != nil {
 		return domain.Comment{}, nil
 	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
+	defer helper.CommitOrRollback(tx, &err)
 
 	comment.CreatedAt = int32(time.Now().Unix())
 
@@ -43,15 +35,6 @@ func (repository *CommentRepositoryImpl) PostComment(ctx context.Context, commen
 	err = row.Scan(&comment.Id)
 	if err != nil {
 		return domain.Comment{}, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
-		return domain.Comment{}, nil
 	}
 
 	return comment, nil
@@ -63,15 +46,7 @@ func (repository *CommentRepositoryImpl) GetComment(ctx context.Context) ([]doma
 	if err != nil {
 		return []domain.Comment{}, []domain.User{}, []domain.Photo{}, nil
 	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
+	defer helper.CommitOrRollback(tx, &err)
 
 	query := "SELECT comments.id, comments.message, comments.photo_id, comments.user_id, comments.created_at, comments.updated_at, users.id, users.email, users.username, photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id FROM comments JOIN photos ON comments.photo_id = photos.id JOIN users ON comments.user_id = users.id WHERE comments.deleted_at IS NULL;"
 	rows, err := tx.QueryContext(ctx, query)
@@ -99,15 +74,6 @@ func (repository *CommentRepositoryImpl) GetComment(ctx context.Context) ([]doma
 		comments = append(comments, comment)
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
-		return []domain.Comment{}, []domain.User{}, []domain.Photo{}, nil
-	}
-
 	return comments, users, photos, nil
 }
 
@@ -117,15 +83,8 @@ func (repository *CommentRepositoryImpl) UpdateComment(ctx context.Context, comm
 	if err != nil {
 		return domain.Comment{}, nil
 	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
+	defer helper.CommitOrRollback(tx, &err)
+
 	comment.UpdatedAt = int32(time.Now().Unix())
 
 	query := "UPDATE comments SET message=$1, updated_at=$2, user_id=$3 WHERE id=$4 RETURNING photo_id"
@@ -134,15 +93,6 @@ func (repository *CommentRepositoryImpl) UpdateComment(ctx context.Context, comm
 	err = row.Scan(&comment.PhotoId)
 	if err != nil {
 		return domain.Comment{}, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
-		return domain.Comment{}, nil
 	}
 
 	return comment, nil
@@ -154,15 +104,7 @@ func (repository *CommentRepositoryImpl) DeleteComment(ctx context.Context, id i
 	if err != nil {
 		return nil
 	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
+	defer helper.CommitOrRollback(tx, &err)
 
 	deleteTime := int32(time.Now().Unix())
 
@@ -177,15 +119,6 @@ func (repository *CommentRepositoryImpl) DeleteComment(ctx context.Context, id i
 	}
 	if rows == 0 {
 		return errors.New("comment not found")
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
-		return nil
 	}
 
 	return nil

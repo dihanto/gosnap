@@ -2,8 +2,6 @@ package usecase
 
 import (
 	"context"
-	"database/sql"
-	"log"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -16,15 +14,13 @@ import (
 
 type UserUsecaseImpl struct {
 	UserRepository repository.UserRepository
-	DB             *sql.DB
 	Validate       *validator.Validate
 	Timeout        int
 }
 
-func NewUserUsecase(userRepository repository.UserRepository, db *sql.DB, validate *validator.Validate, timeout int) UserUsecase {
+func NewUserUsecase(userRepository repository.UserRepository, validate *validator.Validate, timeout int) UserUsecase {
 	return &UserUsecaseImpl{
 		UserRepository: userRepository,
-		DB:             db,
 		Validate:       validate,
 		Timeout:        timeout,
 	}
@@ -38,20 +34,6 @@ func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request reques
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	tx, err := usecase.DB.Begin()
-	if err != nil {
-		return response.UserRegister{}, err
-	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
-
 	user := domain.User{
 		Email:    request.Email,
 		Username: request.Username,
@@ -60,17 +42,8 @@ func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request reques
 	}
 	user.Id = uuid.New()
 
-	user, err = usecase.UserRepository.UserRegister(ctx, tx, user)
+	user, err = usecase.UserRepository.UserRegister(ctx, user)
 	if err != nil {
-		return response.UserRegister{}, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
 		return response.UserRegister{}, err
 	}
 
@@ -90,31 +63,8 @@ func (usecase *UserUsecaseImpl) UserLogin(ctx context.Context, username string, 
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	tx, err := usecase.DB.Begin()
+	response, id, err := usecase.UserRepository.UserLogin(ctx, username, password)
 	if err != nil {
-		return false, uuid.Nil, err
-	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
-
-	response, id, err := usecase.UserRepository.UserLogin(ctx, tx, username, password)
-	if err != nil {
-		return false, uuid.Nil, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
 		return false, uuid.Nil, err
 	}
 
@@ -130,37 +80,14 @@ func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request request.
 		return response.UserUpdate{}, err
 	}
 
-	tx, err := usecase.DB.Begin()
-	if err != nil {
-		return response.UserUpdate{}, err
-	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
-
 	userReq := domain.User{
 		Id:       request.Id,
 		Username: request.Username,
 		Email:    request.Email,
 	}
 
-	userResponse, err := usecase.UserRepository.UserUpdate(ctx, tx, userReq)
+	userResponse, err := usecase.UserRepository.UserUpdate(ctx, userReq)
 	if err != nil {
-		return response.UserUpdate{}, err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
 		return response.UserUpdate{}, err
 	}
 
@@ -180,31 +107,8 @@ func (usecase *UserUsecaseImpl) UserDelete(ctx context.Context, id uuid.UUID) er
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	tx, err := usecase.DB.Begin()
+	err := usecase.UserRepository.UserDelete(ctx, id)
 	if err != nil {
-		return err
-	}
-	defer func() {
-		if recover := recover(); recover != nil {
-			rollbackErr := tx.Rollback()
-			if rollbackErr != nil {
-				log.Println("Failed to rollback transaction:", rollbackErr)
-			}
-			panic(recover)
-		}
-	}()
-
-	err = usecase.UserRepository.UserDelete(ctx, tx, id)
-	if err != nil {
-		return err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			log.Println("Failed to rollback transaction:", rollbackErr)
-		}
 		return err
 	}
 
