@@ -52,8 +52,8 @@ func main() {
 	}
 
 	{
-		socialMediaRepository := repository.NewSocialMediaRepository()
-		socialMediaUsecase := usecase.NewSocialMediaUsecase(socialMediaRepository, databaseConnection, validate, usecaseTimeout)
+		socialMediaRepository := repository.NewSocialMediaRepository(databaseConnection)
+		socialMediaUsecase := usecase.NewSocialMediaUsecase(socialMediaRepository, validate, usecaseTimeout)
 		controller.NewSocialMediaController(socialMediaUsecase, router)
 	}
 
