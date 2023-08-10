@@ -40,8 +40,8 @@ func main() {
 	}
 
 	{
-		photoRepository := repository.NewPhotoRepository()
-		photoUsecase := usecase.NewPhotoUsecase(photoRepository, databaseConnection, validate, usecaseTimeout)
+		photoRepository := repository.NewPhotoRepository(databaseConnection)
+		photoUsecase := usecase.NewPhotoUsecase(photoRepository, validate, usecaseTimeout)
 		controller.NewPhotoController(photoUsecase, router)
 	}
 
