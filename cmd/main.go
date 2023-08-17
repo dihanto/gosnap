@@ -57,6 +57,12 @@ func main() {
 		controller.NewSocialMediaController(socialMediaUsecase, router)
 	}
 
+	{
+		followRepository := repository.NewFollowRepositoryImpl(databaseConnection)
+		followUsecase := usecase.NewFollowUsecaseImpl(followRepository, validate, usecaseTimeout)
+		controller.NewFollowControllerImpl(followUsecase, router)
+	}
+
 	router.Start(serverHost + ":" + serverPort)
 
 }
