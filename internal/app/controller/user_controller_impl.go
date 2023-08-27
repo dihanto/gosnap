@@ -143,6 +143,6 @@ func (controller *UserControllerImpl) UserDelete(ctx echo.Context) error {
 		Status:  http.StatusOK,
 		Message: "Your account has been successfully deleted",
 	}
-
+	
 	return ctx.JSON(http.StatusOK, webResponse)
 }

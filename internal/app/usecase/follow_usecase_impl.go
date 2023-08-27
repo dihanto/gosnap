@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
-	"github.com/dihanto/gosnap/model/domain"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
@@ -24,11 +23,11 @@ func NewFollowUsecaseImpl(repository repository.FollowRepository, validate *vali
 	}
 }
 
-func (usecase *FollowUsecaseImpl) FollowUser(ctx context.Context, followerId uuid.UUID, username string) (user domain.User, err error) {
+func (usecase *FollowUsecaseImpl) FollowUser(ctx context.Context, followerId uuid.UUID, username string) (err error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	err = usecase.Validate.Var(followerId, "required")
+	err = usecase.Validate.Var(followerId, "required,follow="+username)
 	if err != nil {
 		return
 	}
@@ -37,7 +36,7 @@ func (usecase *FollowUsecaseImpl) FollowUser(ctx context.Context, followerId uui
 		return
 	}
 
-	user, err = usecase.Repository.FollowUser(ctx, followerId, username)
+	err = usecase.Repository.FollowUser(ctx, followerId, username)
 	if err != nil {
 		return
 	}

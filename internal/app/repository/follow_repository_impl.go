@@ -5,7 +5,6 @@ import (
 	"database/sql"
 
 	"github.com/dihanto/gosnap/internal/app/helper"
-	"github.com/dihanto/gosnap/model/domain"
 	"github.com/google/uuid"
 )
 
@@ -19,7 +18,7 @@ func NewFollowRepositoryImpl(database *sql.DB) FollowRepository {
 	}
 }
 
-func (repository *FollowRepositoryImpl) FollowUser(ctx context.Context, followerId uuid.UUID, username string) (user domain.User, err error) {
+func (repository *FollowRepositoryImpl) FollowUser(ctx context.Context, followerId uuid.UUID, username string) (err error) {
 	tx, err := repository.Database.Begin()
 	if err != nil {
 		return
@@ -28,6 +27,12 @@ func (repository *FollowRepositoryImpl) FollowUser(ctx context.Context, follower
 
 	query := "UPDATE users SET followers = followers + 1 WHERE username = $1"
 	_, err = tx.ExecContext(ctx, query, username)
+	if err != nil {
+		return
+	}
+
+	queryFollow := "INSERT INTO follower_details(username, follower_id) VALUES ($1, $2)"
+	_, err = tx.ExecContext(ctx, queryFollow, username, followerId)
 	if err != nil {
 		return
 	}

@@ -92,3 +92,31 @@ func ValidateOneUserOneLike(field validator.FieldLevel) bool {
 
 	return true
 }
+
+func ValidateUserNotFollowTwice(field validator.FieldLevel) bool {
+	value := field.Field().Interface().(uuid.UUID)
+	username := field.Param()
+
+	conn, _ := config.InitDatabaseConnection()
+	defer conn.Close()
+
+	query := "SELECT follower_id FROM follower_details WHERE username=$1"
+	rows, err := conn.QueryContext(context.Background(), query, username)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer rows.Close()
+
+	var id uuid.UUID
+	for rows.Next() {
+		err = rows.Scan(&id)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		if value == id {
+			return false
+		}
+	}
+
+	return true
+}

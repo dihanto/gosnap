@@ -80,6 +80,8 @@ func validationError(errs interface{}, ctx echo.Context) bool {
 				message = fmt.Sprintf("%s must be unique", fieldName)
 			case "username_uniq":
 				message = fmt.Sprintf("%s must be unique", fieldName)
+			case "follow":
+				message = fmt.Sprintf("%s you have already following", fieldName)
 			case "min":
 				message = fmt.Sprintf("%s must be at least %s characters long", fieldName, err.Param())
 			case "gt":

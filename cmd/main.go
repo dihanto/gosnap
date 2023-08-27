@@ -32,6 +32,7 @@ func main() {
 	validate.RegisterValidation("email_uniq", helper.ValidateEmailUniq)
 	validate.RegisterValidation("username_uniq", helper.ValidateUsernameUniq)
 	validate.RegisterValidation("likes", helper.ValidateOneUserOneLike)
+	validate.RegisterValidation("follow", helper.ValidateUserNotFollowTwice)
 
 	{
 		userRepository := repository.NewUserRepository(databaseConnection)

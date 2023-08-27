@@ -1,7 +1,7 @@
 CREATE TABLE
     follower_details (
-        user_id uuid,
+        username VARCHAR(100),
         follower_id uuid,
-        Foreign Key (user_id) REFERENCES users(id),
+        Foreign Key (username) REFERENCES users(username),
         Foreign Key (follower_id) REFERENCES users(id)
     )

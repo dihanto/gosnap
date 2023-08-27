@@ -1,11 +1,13 @@
 package controller
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/dihanto/gosnap/internal/app/helper"
 	"github.com/dihanto/gosnap/internal/app/middleware"
 	"github.com/dihanto/gosnap/internal/app/usecase"
+	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/labstack/echo/v4"
 )
 
@@ -40,7 +42,21 @@ func (controller *FollowControllerImpl) FollowUser(ctx echo.Context) (err error)
 
 	username := ctx.Param("username")
 
-	controller.Usecase.FollowUser(ctx.Request().Context(), followerId, username)
+	err = controller.Usecase.FollowUser(ctx.Request().Context(), followerId, username)
+	if err != nil {
+		return
+	}
+
+	webResponse := response.WebResponse{
+		Status:  http.StatusCreated,
+		Message: "Success follow " + username,
+		Data:    nil,
+	}
+
+	err = ctx.JSON(http.StatusCreated, webResponse)
+	if err != nil {
+		return
+	}
 
 	return
 }

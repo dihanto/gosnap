@@ -122,3 +122,13 @@ method=PUT, uri=/photos/123, status=404
 2023-08-17T10:45:08+07:00, method=POST, uri=/follows/dihanto, status=200, latency=2.9339ms
 2023-08-17T10:45:09+07:00, method=POST, uri=/follows/dihanto, status=200, latency=2.4122ms
 2023-08-17T10:45:10+07:00, method=POST, uri=/follows/dihanto, status=200, latency=2.7963ms
+2023-08-28T02:25:17+07:00, method=POST, uri=/users/register, status=201, latency=465.3669ms
+2023-08-28T02:25:24+07:00, method=POST, uri=/users/login, status=200, latency=186.2661ms
+2023-08-28T02:25:55+07:00, method=POST, uri=/users/register, status=201, latency=713.7114ms
+2023-08-28T02:26:19+07:00, method=POST, uri=/follows/dihanto, status=200, latency=14.0168ms
+2023-08-28T02:27:48+07:00, method=POST, uri=/follows/dihanto, status=200, latency=292.1724ms
+2023-08-28T02:28:15+07:00, method=POST, uri=/follows/dihantooo, status=200, latency=12.7765ms
+2023-08-28T02:28:46+07:00, method=POST, uri=/follows/dihanto, status=200, latency=3.6062ms
+2023-08-28T02:37:32+07:00, method=POST, uri=/follows/dihantoo, status=500, latency=97.8449ms
+2023-08-28T02:37:46+07:00, method=POST, uri=/follows/dihanto, status=201, latency=10.8759ms
+2023-08-28T02:50:29+07:00, method=POST, uri=/follows/dihanto, status=400, latency=117.6078ms
