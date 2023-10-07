@@ -8,5 +8,5 @@ import (
 
 type FollowRepository interface {
 	FollowUser(ctx context.Context, followerId uuid.UUID, username string) (err error)
-	UnFollowUser(ctx context.Context, id int) error
+	UnFollowUser(ctx context.Context, followerId uuid.UUID, username string) error
 }

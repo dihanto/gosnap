@@ -40,6 +40,25 @@ func (repository *FollowRepositoryImpl) FollowUser(ctx context.Context, follower
 	return
 }
 
-func (repository *FollowRepositoryImpl) UnFollowUser(ctx context.Context, id int) error {
-	panic("not implemented") // TODO: Implement
+func (repository *FollowRepositoryImpl) UnFollowUser(ctx context.Context, followerId uuid.UUID, username string) error {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return err
+	}
+	defer helper.CommitOrRollback(tx, &err)
+
+	query := "DELETE FROM follower_details WHERE follower_id=$1"
+	_, err = tx.ExecContext(ctx, query, followerId)
+	if err != nil {
+		return err
+	}
+
+	queryUser := "UPDATE users SET followers=followers-1 WHERE username=$1"
+	_, err = tx.ExecContext(ctx, queryUser, username)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

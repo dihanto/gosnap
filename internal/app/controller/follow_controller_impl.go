@@ -30,6 +30,7 @@ func (controller *FollowControllerImpl) route(echo *echo.Echo) {
 	followGroup := echo.Group("/follows")
 	followGroup.Use(middleware.Auth)
 	followGroup.POST("/:username", controller.FollowUser)
+	followGroup.DELETE("/:username", controller.UnfollowUser)
 }
 
 func (controller *FollowControllerImpl) FollowUser(ctx echo.Context) (err error) {
@@ -62,5 +63,29 @@ func (controller *FollowControllerImpl) FollowUser(ctx echo.Context) (err error)
 }
 
 func (controller *FollowControllerImpl) UnfollowUser(ctx echo.Context) (err error) {
-	panic("not implemented") // TODO: Implement
+	authHeader := ctx.Request().Header.Get("Authorization")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	followerId, err := helper.GetUserDataFromToken(tokenString)
+	if err != nil {
+		return
+	}
+
+	username := ctx.Param("username")
+
+	err = controller.Usecase.UnFollowUser(ctx.Request().Context(), followerId, username)
+	if err != nil {
+		return
+	}
+
+	webResponse := response.WebResponse{
+		Status:  http.StatusOK,
+		Message: "Unfollow " + username + " success",
+		Data:    nil,
+	}
+
+	err = ctx.JSON(http.StatusOK, webResponse)
+	if err != nil {
+		return
+	}
+	return
 }
