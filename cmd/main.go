@@ -10,6 +10,7 @@ import (
 	"github.com/dihanto/gosnap/internal/app/usecase"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/spf13/viper"
 )
 
@@ -22,6 +23,10 @@ func main() {
 
 	router := echo.New()
 	router.HTTPErrorHandler = exception.ErrorHandler
+	router.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
+	}))
 
 	logFile := config.InitLogFile()
 	defer logFile.Close()
