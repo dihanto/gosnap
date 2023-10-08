@@ -36,6 +36,7 @@ func (controller *UserControllerImpl) route(echo *echo.Echo) {
 	usersGroup.Use(middleware.Auth)
 	usersGroup.PUT("", controller.UserUpdate)
 	usersGroup.DELETE("", controller.UserDelete)
+	usersGroup.GET("", controller.FindUser)
 }
 
 func (controller *UserControllerImpl) UserRegister(ctx echo.Context) error {
@@ -143,6 +144,34 @@ func (controller *UserControllerImpl) UserDelete(ctx echo.Context) error {
 		Status:  http.StatusOK,
 		Message: "Your account has been successfully deleted",
 	}
-	
+
 	return ctx.JSON(http.StatusOK, webResponse)
+}
+
+func (controller *UserControllerImpl) FindUser(ctx echo.Context) error {
+	authHeader := ctx.Request().Header.Get("Authorization")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	id, err := helper.GetUserDataFromToken(tokenString)
+	if err != nil {
+		return err
+	}
+
+	user, err := controller.UserUsecase.FindUser(ctx.Request().Context(), id)
+	if err != nil {
+		return err
+	}
+
+	webResponse := response.WebResponse{
+		Status:  http.StatusOK,
+		Message: "Find user success",
+		Data:    user,
+	}
+
+	err = ctx.JSON(http.StatusOK, webResponse)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

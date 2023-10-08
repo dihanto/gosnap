@@ -12,4 +12,5 @@ type UserRepository interface {
 	UserLogin(ctx context.Context, username string, password string) (bool, uuid.UUID, error)
 	UserUpdate(ctx context.Context, user domain.User) (domain.User, error)
 	UserDelete(ctx context.Context, id uuid.UUID) error
+	FindUser(ctx context.Context, id uuid.UUID) (user domain.User, err error)
 }

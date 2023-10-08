@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -37,6 +38,7 @@ func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request reques
 	user := domain.User{
 		Email:    request.Email,
 		Username: request.Username,
+		Name:     request.Name,
 		Password: request.Password,
 		Age:      request.Age,
 	}
@@ -113,4 +115,28 @@ func (usecase *UserUsecaseImpl) UserDelete(ctx context.Context, id uuid.UUID) er
 	}
 
 	return nil
+}
+
+func (usecase *UserUsecaseImpl) FindUser(ctx context.Context, id uuid.UUID) (response.FindUser, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
+	err := usecase.Validate.Var(id, "required")
+	if err != nil {
+		return response.FindUser{}, err
+	}
+
+	user, err := usecase.UserRepository.FindUser(ctx, id)
+	if err != nil {
+		return response.FindUser{}, nil
+	}
+
+	userResponse := response.FindUser{
+		Username: user.Username,
+		Name:     user.Name,
+	}
+
+	log.Println(userResponse)
+
+	return userResponse, nil
 }

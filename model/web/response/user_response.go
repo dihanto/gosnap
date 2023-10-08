@@ -21,3 +21,8 @@ type UserUpdate struct {
 	Age       int       `json:"age"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+type FindUser struct {
+	Username string `json:"username"`
+	Name     string `json:"name"`
+}

@@ -13,4 +13,5 @@ type UserUsecase interface {
 	UserLogin(ctx context.Context, username, password string) (bool, uuid.UUID, error)
 	UserUpdate(ctx context.Context, request request.UserUpdate) (response.UserUpdate, error)
 	UserDelete(ctx context.Context, id uuid.UUID) error
+	FindUser(ctx context.Context, id uuid.UUID) (response.FindUser, error)
 }

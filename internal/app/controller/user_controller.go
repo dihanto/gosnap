@@ -7,4 +7,5 @@ type UserController interface {
 	UserLogin(ctx echo.Context) error
 	UserUpdate(ctx echo.Context) error
 	UserDelete(ctx echo.Context) error
+	FindUser(ctx echo.Context) error
 }

@@ -36,8 +36,8 @@ func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, user dom
 		return domain.User{}, err
 	}
 
-	query := "INSERT INTO users (id, username, email, password, age, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
-	_, err = tx.ExecContext(ctx, query, user.Id, user.Username, user.Email, password, user.Age, user.CreatedAt)
+	query := "INSERT INTO users (id, username, name, email, password, age, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
+	_, err = tx.ExecContext(ctx, query, user.Id, user.Username, user.Name, user.Email, password, user.Age, user.CreatedAt)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -121,4 +121,21 @@ func (repository *UserRepositoryImpl) UserDelete(ctx context.Context, id uuid.UU
 	}
 
 	return nil
+}
+
+func (repository *UserRepositoryImpl) FindUser(ctx context.Context, id uuid.UUID) (user domain.User, err error) {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return
+	}
+	defer helper.CommitOrRollback(tx, &err)
+
+	query := "SELECT username, name FROM users WHERE id=$1"
+	err = tx.QueryRowContext(ctx, query, id).Scan(&user.Username, &user.Name)
+	if err != nil {
+		return
+	}
+
+	return user, nil
+
 }

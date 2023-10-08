@@ -5,6 +5,7 @@ import "github.com/google/uuid"
 type UserRegister struct {
 	Email    string `validate:"required,email,email_uniq" json:"email"`
 	Username string `validate:"required,username_uniq" json:"username"`
+	Name     string `validate:"required" json:"name"`
 	Password string `validate:"required,min=6" json:"password"`
 	Age      int    `validate:"required,gt=8" json:"age"`
 }
