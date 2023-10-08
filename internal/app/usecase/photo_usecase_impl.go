@@ -91,6 +91,7 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]response.GetPh
 			Id:        photo.Id,
 			Title:     photo.Title,
 			Caption:   photo.Caption,
+			Likes:     photo.Likes,
 			PhotoUrl:  photo.PhotoUrl,
 			UserId:    photo.UserId,
 			CreatedAt: tCreate,

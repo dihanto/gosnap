@@ -49,7 +49,7 @@ func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context) ([]domain.P
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "SELECT photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email FROM photos JOIN users ON photos.user_id = users.id WHERE photos.deleted_at IS NULL;"
+	query := "SELECT photos.id, photos.title, photos.caption, photos.likes, photos.photo_url, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email FROM photos JOIN users ON photos.user_id = users.id WHERE photos.deleted_at IS NULL;"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
 		return []domain.Photo{}, []domain.User{}, err
@@ -61,7 +61,7 @@ func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context) ([]domain.P
 	for rows.Next() {
 		photo := domain.Photo{}
 		user := domain.User{}
-		err := rows.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.PhotoUrl, &photo.UserId, &photo.CreatedAt, &photo.UpdatedAt, &user.Username, &user.Email)
+		err := rows.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.Likes, &photo.PhotoUrl, &photo.UserId, &photo.CreatedAt, &photo.UpdatedAt, &user.Username, &user.Email)
 		if err != nil {
 			return []domain.Photo{}, []domain.User{}, err
 		}

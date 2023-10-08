@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -135,8 +134,6 @@ func (usecase *UserUsecaseImpl) FindUser(ctx context.Context, id uuid.UUID) (res
 		Username: user.Username,
 		Name:     user.Name,
 	}
-
-	log.Println(userResponse)
 
 	return userResponse, nil
 }
