@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS like_details;
+DROP TABLE IF EXISTS likes;

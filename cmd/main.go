@@ -68,6 +68,11 @@ func main() {
 		followUsecase := usecase.NewFollowUsecaseImpl(followRepository, validate, usecaseTimeout)
 		controller.NewFollowControllerImpl(followUsecase, router)
 	}
+	{
+		likeRepository := repository.NewLikeRepository(databaseConnection)
+		likeUsecase := usecase.NewLikeUsecaseImpl(likeRepository, validate, usecaseTimeout)
+		controller.NewLikeController(likeUsecase, router)
+	}
 
 	router.Start(serverHost + ":" + serverPort)
 

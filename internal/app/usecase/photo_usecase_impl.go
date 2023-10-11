@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -10,7 +9,6 @@ import (
 	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 )
 
 type PhotoUsecaseImpl struct {
@@ -91,7 +89,6 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]response.GetPh
 			Id:        photo.Id,
 			Title:     photo.Title,
 			Caption:   photo.Caption,
-			Likes:     photo.Likes,
 			PhotoUrl:  photo.PhotoUrl,
 			UserId:    photo.UserId,
 			CreatedAt: tCreate,
@@ -150,54 +147,4 @@ func (usecase *PhotoUsecaseImpl) DeletePhoto(ctx context.Context, id int) error 
 	}
 
 	return nil
-}
-
-func (usecase *PhotoUsecaseImpl) LikePhoto(ctx context.Context, id int, userId uuid.UUID) (response.LikePhoto, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
-	defer cancel()
-
-	idString := strconv.Itoa(id)
-	err := usecase.Validate.Var(userId, "required,likes="+idString)
-
-	if err != nil {
-		return response.LikePhoto{}, err
-	}
-
-	photo, err := usecase.Repository.LikePhoto(ctx, id, userId)
-	if err != nil {
-		return response.LikePhoto{}, err
-	}
-
-	photoResponse := response.LikePhoto{
-		Id:       photo.Id,
-		Title:    photo.Title,
-		PhotoUrl: photo.PhotoUrl,
-		Likes:    photo.Likes,
-	}
-
-	return photoResponse, nil
-}
-
-func (usecase *PhotoUsecaseImpl) UnlikePhoto(ctx context.Context, id int, userId uuid.UUID) (response.UnLikePhoto, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
-	defer cancel()
-
-	err := usecase.Validate.Var(userId, "required")
-	if err != nil {
-		return response.UnLikePhoto{}, err
-	}
-
-	photo, err := usecase.Repository.UnLikePhoto(ctx, id, userId)
-	if err != nil {
-		return response.UnLikePhoto{}, err
-	}
-
-	photoResponse := response.UnLikePhoto{
-		Id:       photo.Id,
-		Title:    photo.Title,
-		PhotoUrl: photo.PhotoUrl,
-		Likes:    photo.Likes,
-	}
-
-	return photoResponse, nil
 }

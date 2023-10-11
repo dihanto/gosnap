@@ -35,8 +35,6 @@ func (photoControllerImpl *PhotoControllerImpl) route(echo *echo.Echo) {
 	photosGroup.GET("", photoControllerImpl.GetPhoto)
 	photosGroup.PUT("/:photoId", photoControllerImpl.UpdatePhoto)
 	photosGroup.DELETE("/:photoId", photoControllerImpl.DeletePhoto)
-	photosGroup.POST("/:photoId/like", photoControllerImpl.LikePhoto)
-	photosGroup.DELETE("/:photoId/unlike", photoControllerImpl.UnlikePhoto)
 }
 
 func (controller *PhotoControllerImpl) PostPhoto(ctx echo.Context) error {
@@ -132,62 +130,4 @@ func (controller *PhotoControllerImpl) DeletePhoto(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, webResponse)
-}
-
-func (controller *PhotoControllerImpl) LikePhoto(ctx echo.Context) error {
-	idString := ctx.Param("photoId")
-	id, err := strconv.Atoi(idString)
-	if err != nil {
-		return err
-	}
-
-	authHeader := ctx.Request().Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	userId, err := helper.GetUserDataFromToken(tokenString)
-	if err != nil {
-		return err
-	}
-
-	photoResponse, err := controller.Usecase.LikePhoto(ctx.Request().Context(), id, userId)
-	if err != nil {
-		return err
-	}
-
-	webResponse := response.WebResponse{
-		Status:  http.StatusOK,
-		Message: "Like photo success",
-		Data:    photoResponse,
-	}
-
-	return ctx.JSON(http.StatusOK, webResponse)
-
-}
-
-func (controller *PhotoControllerImpl) UnlikePhoto(ctx echo.Context) error {
-	idString := ctx.Param("photoId")
-	id, err := strconv.Atoi(idString)
-	if err != nil {
-		return err
-	}
-
-	authHeader := ctx.Request().Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	userId, err := helper.GetUserDataFromToken(tokenString)
-	if err != nil {
-		return err
-	}
-
-	photoResponse, err := controller.Usecase.UnlikePhoto(ctx.Request().Context(), id, userId)
-	if err != nil {
-		return err
-	}
-
-	webResponse := response.WebResponse{
-		Status:  http.StatusOK,
-		Message: "Success unlike photo",
-		Data:    photoResponse,
-	}
-
-	return ctx.JSON(http.StatusOK, webResponse)
-
 }

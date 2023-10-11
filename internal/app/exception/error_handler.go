@@ -57,8 +57,7 @@ func internalServerError(err interface{}, ctx echo.Context) {
 	}
 	webResponse := response.WebResponse{
 		Status:  http.StatusInternalServerError,
-		Message: "Internal Server Error",
-		Data:    dataError,
+		Message: dataError,
 	}
 
 	ctx.JSON(http.StatusInternalServerError, webResponse)
