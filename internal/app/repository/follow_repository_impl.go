@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/dihanto/gosnap/internal/app/helper"
-	"github.com/google/uuid"
+	"github.com/dihanto/gosnap/model/domain"
 )
 
 type FollowRepositoryImpl struct {
@@ -18,47 +18,59 @@ func NewFollowRepositoryImpl(database *sql.DB) FollowRepository {
 	}
 }
 
-func (repository *FollowRepositoryImpl) FollowUser(ctx context.Context, followerId uuid.UUID, username string) (err error) {
+func (repository *FollowRepositoryImpl) FollowUser(ctx context.Context, follow domain.Follow) (domain.Follow, error) {
 	tx, err := repository.Database.Begin()
 	if err != nil {
-		return
+		return domain.Follow{}, err
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "UPDATE users SET followers = followers + 1 WHERE username = $1"
-	_, err = tx.ExecContext(ctx, query, username)
+	query := "UPDATE followers SET follower_count=follower_count+1 WHERE username=$1"
+	_, err = tx.ExecContext(ctx, query, follow.TargetUsername)
 	if err != nil {
-		return
+		return domain.Follow{}, err
 	}
 
-	queryFollow := "INSERT INTO follower_details(username, follower_id) VALUES ($1, $2)"
-	_, err = tx.ExecContext(ctx, queryFollow, username, followerId)
+	queryFollow := "INSERT INTO follower_details(username, follower_name) VALUES ($1, $2)"
+	_, err = tx.ExecContext(ctx, queryFollow, follow.TargetUsername, follow.FollowerUsername)
 	if err != nil {
-		return
+		return domain.Follow{}, err
 	}
 
-	return
+	queryResult := "SELECT follower_count FROM followers WHERE username=$1"
+	err = tx.QueryRowContext(ctx, queryResult, follow.TargetUsername).Scan(&follow.FollowerCount)
+	if err != nil {
+		return domain.Follow{}, err
+	}
+
+	return follow, nil
 }
 
-func (repository *FollowRepositoryImpl) UnFollowUser(ctx context.Context, followerId uuid.UUID, username string) error {
+func (repository *FollowRepositoryImpl) UnFollowUser(ctx context.Context, follow domain.Follow) (domain.Follow, error) {
 	tx, err := repository.Database.Begin()
 	if err != nil {
-		return err
+		return domain.Follow{}, err
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "DELETE FROM follower_details WHERE follower_id=$1"
-	_, err = tx.ExecContext(ctx, query, followerId)
+	query := "DELETE FROM follower_details WHERE follower_name=$1"
+	_, err = tx.ExecContext(ctx, query, follow.FollowerUsername)
 	if err != nil {
-		return err
+		return domain.Follow{}, err
 	}
 
-	queryUser := "UPDATE users SET followers=followers-1 WHERE username=$1"
-	_, err = tx.ExecContext(ctx, queryUser, username)
+	queryUser := "UPDATE followers SET follower_count=follower_count-1 WHERE username=$1"
+	_, err = tx.ExecContext(ctx, queryUser, follow.TargetUsername)
 	if err != nil {
-		return err
+		return domain.Follow{}, err
 	}
 
-	return nil
+	queryResult := "SELECT follower_count FROM followers WHERE username=$1"
+	err = tx.QueryRowContext(ctx, queryResult, follow.TargetUsername).Scan(&follow.FollowerCount)
+	if err != nil {
+		return domain.Follow{}, err
+	}
+
+	return follow, nil
 
 }

@@ -3,10 +3,11 @@ package usecase
 import (
 	"context"
 
-	"github.com/google/uuid"
+	"github.com/dihanto/gosnap/model/web/request"
+	"github.com/dihanto/gosnap/model/web/response"
 )
 
 type FollowUsecase interface {
-	FollowUser(ctx context.Context, followerId uuid.UUID, username string) (err error)
-	UnFollowUser(ctx context.Context, followerId uuid.UUID, username string) (err error)
+	FollowUser(ctx context.Context, request request.Follow) (response.Follow, error)
+	UnFollowUser(ctx context.Context, request request.Follow) (response.Follow, error)
 }

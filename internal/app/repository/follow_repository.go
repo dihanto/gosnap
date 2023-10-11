@@ -3,10 +3,10 @@ package repository
 import (
 	"context"
 
-	"github.com/google/uuid"
+	"github.com/dihanto/gosnap/model/domain"
 )
 
 type FollowRepository interface {
-	FollowUser(ctx context.Context, followerId uuid.UUID, username string) (err error)
-	UnFollowUser(ctx context.Context, followerId uuid.UUID, username string) error
+	FollowUser(ctx context.Context, follow domain.Follow) (domain.Follow, error)
+	UnFollowUser(ctx context.Context, follow domain.Follow) (domain.Follow, error)
 }

@@ -29,3 +29,23 @@ func GetUserDataFromToken(tokenString string) (uuid.UUID, error) {
 
 	return uuid.Nil, err
 }
+
+func GetUsernameFromToken(tokenString string) (string, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte("snapsecret"), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		username, ok := claims["username"].(string)
+		if !ok {
+			return "", err
+		}
+		return username, nil
+	}
+
+	return "", err
+}

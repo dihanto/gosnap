@@ -7,6 +7,7 @@ import (
 	"github.com/dihanto/gosnap/internal/app/helper"
 	"github.com/dihanto/gosnap/internal/app/middleware"
 	"github.com/dihanto/gosnap/internal/app/usecase"
+	"github.com/dihanto/gosnap/model/web/request"
 	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/labstack/echo/v4"
 )
@@ -34,27 +35,28 @@ func (controller *FollowControllerImpl) route(echo *echo.Echo) {
 }
 
 func (controller *FollowControllerImpl) FollowUser(ctx echo.Context) (err error) {
+	request := request.Follow{}
 	authHeader := ctx.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	followerId, err := helper.GetUserDataFromToken(tokenString)
+	request.FollowerUsername, err = helper.GetUsernameFromToken(tokenString)
 	if err != nil {
 		return
 	}
 
-	username := ctx.Param("username")
+	request.TargetUsername = ctx.Param("username")
 
-	err = controller.Usecase.FollowUser(ctx.Request().Context(), followerId, username)
+	follow, err := controller.Usecase.FollowUser(ctx.Request().Context(), request)
 	if err != nil {
 		return
 	}
 
 	webResponse := response.WebResponse{
-		Status:  http.StatusCreated,
-		Message: "Success follow " + username,
-		Data:    nil,
+		Status:  http.StatusOK,
+		Message: "Success follow " + request.TargetUsername,
+		Data:    follow,
 	}
 
-	err = ctx.JSON(http.StatusCreated, webResponse)
+	err = ctx.JSON(http.StatusOK, webResponse)
 	if err != nil {
 		return
 	}
@@ -63,24 +65,25 @@ func (controller *FollowControllerImpl) FollowUser(ctx echo.Context) (err error)
 }
 
 func (controller *FollowControllerImpl) UnfollowUser(ctx echo.Context) (err error) {
+	request := request.Follow{}
 	authHeader := ctx.Request().Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	followerId, err := helper.GetUserDataFromToken(tokenString)
+	request.FollowerUsername, err = helper.GetUsernameFromToken(tokenString)
 	if err != nil {
 		return
 	}
 
-	username := ctx.Param("username")
+	request.TargetUsername = ctx.Param("username")
 
-	err = controller.Usecase.UnFollowUser(ctx.Request().Context(), followerId, username)
+	follow, err := controller.Usecase.UnFollowUser(ctx.Request().Context(), request)
 	if err != nil {
 		return
 	}
 
 	webResponse := response.WebResponse{
 		Status:  http.StatusOK,
-		Message: "Unfollow " + username + " success",
-		Data:    nil,
+		Message: "Unfollow " + request.TargetUsername + " success",
+		Data:    follow,
 	}
 
 	err = ctx.JSON(http.StatusOK, webResponse)

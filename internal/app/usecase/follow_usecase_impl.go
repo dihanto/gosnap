@@ -5,8 +5,10 @@ import (
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
+	"github.com/dihanto/gosnap/model/domain"
+	"github.com/dihanto/gosnap/model/web/request"
+	"github.com/dihanto/gosnap/model/web/response"
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 )
 
 type FollowUsecaseImpl struct {
@@ -23,46 +25,55 @@ func NewFollowUsecaseImpl(repository repository.FollowRepository, validate *vali
 	}
 }
 
-func (usecase *FollowUsecaseImpl) FollowUser(ctx context.Context, followerId uuid.UUID, username string) (err error) {
+func (usecase *FollowUsecaseImpl) FollowUser(ctx context.Context, request request.Follow) (response.Follow, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	err = usecase.Validate.Var(followerId, "required,follow="+username)
+	err := usecase.Validate.Struct(request)
 	if err != nil {
-		return
-	}
-	err = usecase.Validate.Var(username, "required")
-	if err != nil {
-		return
+		return response.Follow{}, err
 	}
 
-	err = usecase.Repository.FollowUser(ctx, followerId, username)
-	if err != nil {
-		return
+	followRequest := domain.Follow{
+		FollowerUsername: request.FollowerUsername,
+		TargetUsername:   request.TargetUsername,
 	}
 
-	return
+	follow, err := usecase.Repository.FollowUser(ctx, followRequest)
+	if err != nil {
+		return response.Follow{}, err
+	}
+
+	followResponse := response.Follow{
+		FollowerCount: follow.FollowerCount,
+	}
+
+	return followResponse, nil
 }
 
-func (usecase *FollowUsecaseImpl) UnFollowUser(ctx context.Context, followerId uuid.UUID, username string) (err error) {
+func (usecase *FollowUsecaseImpl) UnFollowUser(ctx context.Context, request request.Follow) (response.Follow, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	err = usecase.Validate.Var(followerId, "required")
+	err := usecase.Validate.Struct(request)
 	if err != nil {
-		return
+		return response.Follow{}, err
 	}
 
-	err = usecase.Validate.Var(username, "required")
-	if err != nil {
-		return
+	followRequest := domain.Follow{
+		FollowerUsername: request.FollowerUsername,
+		TargetUsername:   request.TargetUsername,
 	}
 
-	err = usecase.Repository.UnFollowUser(ctx, followerId, username)
+	follow, err := usecase.Repository.UnFollowUser(ctx, followRequest)
 	if err != nil {
-		return
+		return response.Follow{}, err
 	}
 
-	return
+	followResponse := response.Follow{
+		FollowerCount: follow.FollowerCount,
+	}
+
+	return followResponse, nil
 
 }
