@@ -67,13 +67,20 @@ func ValidateUsernameUniq(field validator.FieldLevel) bool {
 
 func ValidateOneUserOneLike(field validator.FieldLevel) bool {
 	value := field.Field().Interface().(uuid.UUID)
-	id := field.Param()
+	photoId := field.Param()
+	var likeId int
 
 	conn, _ := config.InitDatabaseConnection()
 	defer conn.Close()
 
-	query := "SELECT user_id FROM like_details WHERE photo_id=$1"
-	rows, err := conn.QueryContext(context.Background(), query, id)
+	queryLikes := "SELECT id FROM likes WHERE photo_id=$1"
+	err := conn.QueryRowContext(context.Background(), queryLikes, photoId).Scan(&likeId)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	queryLikeDetail := "SELECT user_id FROM like_details WHERE like_id=$1"
+	rows, err := conn.QueryContext(context.Background(), queryLikeDetail, likeId)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -94,26 +101,33 @@ func ValidateOneUserOneLike(field validator.FieldLevel) bool {
 }
 
 func ValidateUserNotFollowTwice(field validator.FieldLevel) bool {
-	value := field.Field().Interface().(uuid.UUID)
-	username := field.Param()
+	value := field.Field().Interface().(string)
+	targetUsername := field.Param()
+	var followId int
 
 	conn, _ := config.InitDatabaseConnection()
 	defer conn.Close()
 
-	query := "SELECT follower_id FROM follower_details WHERE username=$1"
-	rows, err := conn.QueryContext(context.Background(), query, username)
+	queryFollowers := "SELECT id FROM followers WHERE username=$1"
+	err := conn.QueryRowContext(context.Background(), queryFollowers, targetUsername).Scan(&followId)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	queryFollowerDetails := "SELECT follower_name FROM follower_details WHERE follow_id=$1"
+	rows, err := conn.QueryContext(context.Background(), queryFollowerDetails, followId)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer rows.Close()
 
-	var id uuid.UUID
+	var followerUsername string
 	for rows.Next() {
-		err = rows.Scan(&id)
+		err = rows.Scan(&followerUsername)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		if value == id {
+		if value == followerUsername {
 			return false
 		}
 	}

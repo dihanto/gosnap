@@ -8,7 +8,6 @@
 CREATE TABLE follower_details (
     follow_id int,
     follower_name VARCHAR(100),
-    username VARCHAR(100),
-    Foreign Key (follower_name) REFERENCES users(username),
-    Foreign Key (username) REFERENCES users(username)
+    Foreign Key (follow_id) REFERENCES followers(id),
+    Foreign Key (follower_name) REFERENCES users(username)
 )

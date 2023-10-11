@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -33,11 +34,11 @@ func (usecase *LikeUsecaseImpl) LikePhoto(ctx context.Context, request request.L
 	if err != nil {
 		return response.Like{}, err
 	}
-	// photoIdString := strconv.Itoa(request.PhotoId)
-	// err = usecase.Validate.Var(request.UserId, "likes="+photoIdString)
-	// if err != nil {
-	// 	return response.Like{}, err
-	// }
+	photoIdString := strconv.Itoa(request.PhotoId)
+	err = usecase.Validate.Var(request.UserId, "likes="+photoIdString)
+	if err != nil {
+		return response.Like{}, err
+	}
 
 	likeRequest := domain.Like{
 		PhotoId:   request.PhotoId,

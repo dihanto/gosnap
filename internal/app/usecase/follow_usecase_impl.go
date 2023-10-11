@@ -33,6 +33,10 @@ func (usecase *FollowUsecaseImpl) FollowUser(ctx context.Context, request reques
 	if err != nil {
 		return response.Follow{}, err
 	}
+	err = usecase.Validate.Var(request.FollowerUsername, "follow="+request.TargetUsername)
+	if err != nil {
+		return response.Follow{}, err
+	}
 
 	followRequest := domain.Follow{
 		FollowerUsername: request.FollowerUsername,

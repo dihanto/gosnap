@@ -25,14 +25,14 @@ func (repository *FollowRepositoryImpl) FollowUser(ctx context.Context, follow d
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "UPDATE followers SET follower_count=follower_count+1 WHERE username=$1"
-	_, err = tx.ExecContext(ctx, query, follow.TargetUsername)
+	query := "UPDATE followers SET follower_count=follower_count+1 WHERE username=$1 RETURNING id"
+	err = tx.QueryRowContext(ctx, query, follow.TargetUsername).Scan(&follow.Id)
 	if err != nil {
 		return domain.Follow{}, err
 	}
 
-	queryFollow := "INSERT INTO follower_details(username, follower_name) VALUES ($1, $2)"
-	_, err = tx.ExecContext(ctx, queryFollow, follow.TargetUsername, follow.FollowerUsername)
+	queryFollow := "INSERT INTO follower_details(follow_id, follower_name) VALUES ($1, $2)"
+	_, err = tx.ExecContext(ctx, queryFollow, follow.Id, follow.FollowerUsername)
 	if err != nil {
 		return domain.Follow{}, err
 	}
