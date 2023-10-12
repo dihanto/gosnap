@@ -74,7 +74,7 @@ func (repository *LikeRepositoryImpl) UnlikePhoto(ctx context.Context, like doma
 		return domain.Like{}, err
 	}
 
-	queryLikeDetail := "DELETE FROM like_details WHERE like_id=$1"
+	queryLikeDetail := "DELETE FROM like_details WHERE user_id=$1"
 	_, err = tx.ExecContext(ctx, queryLikeDetail, like.UserId)
 	if err != nil {
 		return domain.Like{}, err

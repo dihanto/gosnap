@@ -34,17 +34,11 @@ type GetPhoto struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	User      User      `json:"user"`
+	Likes     Likes     `json:"like"`
 }
 
-type LikePhoto struct {
-	Id       int    `json:"id"`
-	Title    string `json:"title"`
-	PhotoUrl string `json:"photoUrl"`
-}
-type UnLikePhoto struct {
-	Id       int    `json:"id"`
-	Title    string `json:"title"`
-	PhotoUrl string `json:"photoUrl"`
+type Likes struct {
+	LikeCount int `json:"likeCount"`
 }
 
 type User struct {

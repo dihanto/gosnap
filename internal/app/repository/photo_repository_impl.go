@@ -46,35 +46,38 @@ func (repository *PhotoRepositoryImpl) PostPhoto(ctx context.Context, photo doma
 }
 
 // GetPhoto is a method to retrieve all photo entries and their associated users from the database.
-func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context) ([]domain.Photo, []domain.User, error) {
+func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context) ([]domain.Photo, []domain.User, []domain.Like, error) {
 	tx, err := repository.Database.Begin()
 	if err != nil {
-		return []domain.Photo{}, []domain.User{}, err
+		return []domain.Photo{}, []domain.User{}, []domain.Like{}, err
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "SELECT photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email FROM photos JOIN users ON photos.user_id = users.id WHERE photos.deleted_at IS NULL;"
+	query := "SELECT photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email, likes.like_count FROM photos JOIN users ON photos.user_id = users.id JOIN likes ON photos.id = likes.photo_id WHERE photos.deleted_at IS NULL;"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
-		return []domain.Photo{}, []domain.User{}, err
+		return []domain.Photo{}, []domain.User{}, []domain.Like{}, err
 	}
 	defer rows.Close()
 
 	var users []domain.User
 	var photos []domain.Photo
+	var likes []domain.Like
 	for rows.Next() {
 		photo := domain.Photo{}
 		user := domain.User{}
-		err := rows.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.PhotoUrl, &photo.UserId, &photo.CreatedAt, &photo.UpdatedAt, &user.Username, &user.Email)
+		like := domain.Like{}
+		err := rows.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.PhotoUrl, &photo.UserId, &photo.CreatedAt, &photo.UpdatedAt, &user.Username, &user.Email, &like.LikeCount)
 		if err != nil {
-			return []domain.Photo{}, []domain.User{}, err
+			return []domain.Photo{}, []domain.User{}, []domain.Like{}, err
 		}
 		user.Id = photo.UserId
+		like.PhotoId = photo.Id
 		users = append(users, user)
 		photos = append(photos, photo)
+		likes = append(likes, like)
 	}
-
-	return photos, users, nil
+	return photos, users, likes, nil
 }
 
 // UpdatePhoto is a method to update a photo entry in the database.

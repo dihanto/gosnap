@@ -8,7 +8,7 @@ import (
 
 type PhotoRepository interface {
 	PostPhoto(ctx context.Context, photo domain.Photo) (domain.Photo, error)
-	GetPhoto(ctx context.Context) ([]domain.Photo, []domain.User, error)
+	GetPhoto(ctx context.Context) ([]domain.Photo, []domain.User, []domain.Like, error)
 	UpdatePhoto(ctx context.Context, photo domain.Photo) (domain.Photo, error)
 	DeletePhoto(ctx context.Context, id int) error
 }

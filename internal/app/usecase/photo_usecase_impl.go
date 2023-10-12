@@ -64,7 +64,7 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]response.GetPh
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	photos, users, err := usecase.Repository.GetPhoto(ctx)
+	photos, users, likes, err := usecase.Repository.GetPhoto(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +85,15 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]response.GetPh
 			}
 		}
 
+		var like response.Likes
+		for _, l := range likes {
+			if l.PhotoId == photo.Id {
+				like = response.Likes{
+					LikeCount: l.LikeCount,
+				}
+			}
+		}
+
 		photoResp := response.GetPhoto{
 			Id:        photo.Id,
 			Title:     photo.Title,
@@ -94,6 +103,7 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]response.GetPh
 			CreatedAt: tCreate,
 			UpdatedAt: tUpdate,
 			User:      user,
+			Likes:     like,
 		}
 
 		photoResponse = append(photoResponse, photoResp)
