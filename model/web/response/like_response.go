@@ -15,5 +15,5 @@ type Like struct {
 
 type Unlike struct {
 	PhotoId   int `json:"photoId"`
-	LikeCount int `json:"LikeCount"`
+	LikeCount int `json:"likeCount"`
 }
