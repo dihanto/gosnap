@@ -34,7 +34,7 @@ type GetComment struct {
 
 type UserComment struct {
 	Id       uuid.UUID `json:"id"`
-	Email    string    `json:"emai"`
+	Email    string    `json:"email"`
 	Username string    `json:"username"`
 }
 type PhotoComment struct {
