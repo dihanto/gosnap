@@ -14,4 +14,5 @@ type UserUsecase interface {
 	UserUpdate(ctx context.Context, request request.UserUpdate) (response.UserUpdate, error)
 	UserDelete(ctx context.Context, id uuid.UUID) error
 	FindUser(ctx context.Context, id uuid.UUID) (response.FindUser, error)
+	FindAllUser(ctx context.Context) (users []response.FindAllUser, err error)
 }

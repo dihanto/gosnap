@@ -26,3 +26,7 @@ type FindUser struct {
 	Username string `json:"username"`
 	Name     string `json:"name"`
 }
+
+type FindAllUser struct {
+	Username string `json:"username"`
+}

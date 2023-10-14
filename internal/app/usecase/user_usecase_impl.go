@@ -13,16 +13,16 @@ import (
 )
 
 type UserUsecaseImpl struct {
-	UserRepository repository.UserRepository
-	Validate       *validator.Validate
-	Timeout        int
+	Repository repository.UserRepository
+	Validate   *validator.Validate
+	Timeout    int
 }
 
-func NewUserUsecase(userRepository repository.UserRepository, validate *validator.Validate, timeout int) UserUsecase {
+func NewUserUsecase(repository repository.UserRepository, validate *validator.Validate, timeout int) UserUsecase {
 	return &UserUsecaseImpl{
-		UserRepository: userRepository,
-		Validate:       validate,
-		Timeout:        timeout,
+		Repository: repository,
+		Validate:   validate,
+		Timeout:    timeout,
 	}
 }
 func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request request.UserRegister) (response.UserRegister, error) {
@@ -43,7 +43,7 @@ func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request reques
 	}
 	user.Id = uuid.New()
 
-	user, err = usecase.UserRepository.UserRegister(ctx, user)
+	user, err = usecase.Repository.UserRegister(ctx, user)
 	if err != nil {
 		return response.UserRegister{}, err
 	}
@@ -64,7 +64,7 @@ func (usecase *UserUsecaseImpl) UserLogin(ctx context.Context, username string, 
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	response, id, err := usecase.UserRepository.UserLogin(ctx, username, password)
+	response, id, err := usecase.Repository.UserLogin(ctx, username, password)
 	if err != nil {
 		return false, uuid.Nil, err
 	}
@@ -87,7 +87,7 @@ func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request request.
 		Email:    request.Email,
 	}
 
-	userResponse, err := usecase.UserRepository.UserUpdate(ctx, userReq)
+	userResponse, err := usecase.Repository.UserUpdate(ctx, userReq)
 	if err != nil {
 		return response.UserUpdate{}, err
 	}
@@ -108,7 +108,7 @@ func (usecase *UserUsecaseImpl) UserDelete(ctx context.Context, id uuid.UUID) er
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	err := usecase.UserRepository.UserDelete(ctx, id)
+	err := usecase.Repository.UserDelete(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func (usecase *UserUsecaseImpl) FindUser(ctx context.Context, id uuid.UUID) (res
 		return response.FindUser{}, err
 	}
 
-	user, err := usecase.UserRepository.FindUser(ctx, id)
+	user, err := usecase.Repository.FindUser(ctx, id)
 	if err != nil {
 		return response.FindUser{}, nil
 	}
@@ -136,4 +136,23 @@ func (usecase *UserUsecaseImpl) FindUser(ctx context.Context, id uuid.UUID) (res
 	}
 
 	return userResponse, nil
+}
+
+func (usecase *UserUsecaseImpl) FindAllUser(ctx context.Context) (users []response.FindAllUser, err error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
+	usersRepository, err := usecase.Repository.FindAllUser(ctx)
+	if err != nil {
+		return
+	}
+
+	for _, userRepository := range usersRepository {
+		user := response.FindAllUser{
+			Username: userRepository.Username,
+		}
+		users = append(users, user)
+	}
+
+	return
 }

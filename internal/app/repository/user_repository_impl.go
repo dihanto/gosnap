@@ -145,3 +145,30 @@ func (repository *UserRepositoryImpl) FindUser(ctx context.Context, id uuid.UUID
 	return user, nil
 
 }
+
+func (repository *UserRepositoryImpl) FindAllUser(ctx context.Context) (users []domain.User, err error) {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return
+	}
+	defer helper.CommitOrRollback(tx, &err)
+
+	query := "SELECT username FROM users"
+	rows, err := tx.QueryContext(ctx, query)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user domain.User
+		err = rows.Scan(&user.Username)
+		if err != nil {
+			return
+		}
+
+		users = append(users, user)
+	}
+
+	return
+}

@@ -13,4 +13,5 @@ type UserRepository interface {
 	UserUpdate(ctx context.Context, user domain.User) (domain.User, error)
 	UserDelete(ctx context.Context, id uuid.UUID) error
 	FindUser(ctx context.Context, id uuid.UUID) (user domain.User, err error)
+	FindAllUser(ctx context.Context) (users []domain.User, err error)
 }

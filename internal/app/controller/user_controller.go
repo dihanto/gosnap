@@ -8,4 +8,5 @@ type UserController interface {
 	UserUpdate(ctx echo.Context) error
 	UserDelete(ctx echo.Context) error
 	FindUser(ctx echo.Context) error
+	FindAllUser(ctx echo.Context) error
 }

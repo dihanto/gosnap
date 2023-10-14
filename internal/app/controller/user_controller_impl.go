@@ -17,14 +17,14 @@ import (
 )
 
 type UserControllerImpl struct {
-	UserUsecase usecase.UserUsecase
-	Route       *echo.Echo
+	Usecase usecase.UserUsecase
+	Route   *echo.Echo
 }
 
-func NewUserController(userUsecase usecase.UserUsecase, route *echo.Echo) UserController {
+func NewUserController(usecase usecase.UserUsecase, route *echo.Echo) UserController {
 	controller := &UserControllerImpl{
-		UserUsecase: userUsecase,
-		Route:       route,
+		Usecase: usecase,
+		Route:   route,
 	}
 	controller.route(route)
 	return controller
@@ -37,6 +37,7 @@ func (controller *UserControllerImpl) route(echo *echo.Echo) {
 	usersGroup.PUT("", controller.UserUpdate)
 	usersGroup.DELETE("", controller.UserDelete)
 	usersGroup.GET("", controller.FindUser)
+	usersGroup.GET("/all", controller.FindAllUser)
 }
 
 func (controller *UserControllerImpl) UserRegister(ctx echo.Context) error {
@@ -46,7 +47,7 @@ func (controller *UserControllerImpl) UserRegister(ctx echo.Context) error {
 		return err
 	}
 
-	userResponse, err := controller.UserUsecase.UserRegister(ctx.Request().Context(), request)
+	userResponse, err := controller.Usecase.UserRegister(ctx.Request().Context(), request)
 	if err != nil {
 		return err
 	}
@@ -69,7 +70,7 @@ func (controller *UserControllerImpl) UserLogin(ctx echo.Context) error {
 	username := request.Username
 	password := request.Password
 
-	res, id, err := controller.UserUsecase.UserLogin(ctx.Request().Context(), username, password)
+	res, id, err := controller.Usecase.UserLogin(ctx.Request().Context(), username, password)
 	if err != nil {
 		return err
 	}
@@ -113,7 +114,7 @@ func (controller *UserControllerImpl) UserUpdate(ctx echo.Context) error {
 		return err
 	}
 
-	userResponse, err := controller.UserUsecase.UserUpdate(ctx.Request().Context(), request)
+	userResponse, err := controller.Usecase.UserUpdate(ctx.Request().Context(), request)
 	if err != nil {
 		return err
 	}
@@ -135,7 +136,7 @@ func (controller *UserControllerImpl) UserDelete(ctx echo.Context) error {
 		return err
 	}
 
-	err = controller.UserUsecase.UserDelete(ctx.Request().Context(), id)
+	err = controller.Usecase.UserDelete(ctx.Request().Context(), id)
 	if err != nil {
 		return err
 	}
@@ -156,7 +157,7 @@ func (controller *UserControllerImpl) FindUser(ctx echo.Context) error {
 		return err
 	}
 
-	user, err := controller.UserUsecase.FindUser(ctx.Request().Context(), id)
+	user, err := controller.Usecase.FindUser(ctx.Request().Context(), id)
 	if err != nil {
 		return err
 	}
@@ -174,4 +175,19 @@ func (controller *UserControllerImpl) FindUser(ctx echo.Context) error {
 
 	return nil
 
+}
+
+func (controller *UserControllerImpl) FindAllUser(ctx echo.Context) error {
+	users, err := controller.Usecase.FindAllUser(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	webResponse := response.WebResponse{
+		Status:  http.StatusOK,
+		Message: "Find all users success",
+		Data:    users,
+	}
+
+	return ctx.JSON(http.StatusOK, webResponse)
 }
