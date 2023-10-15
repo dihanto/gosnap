@@ -81,3 +81,57 @@ func (usecase *FollowUsecaseImpl) UnFollowUser(ctx context.Context, request requ
 	return followResponse, nil
 
 }
+
+func (usecase *FollowUsecaseImpl) GetFollower(ctx context.Context, request request.Follow) (followers []response.GetFollower, err error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
+	err = usecase.Validate.Var(request.TargetUsername, "required")
+	if err != nil {
+		return
+	}
+	followersRequest := domain.Follow{
+		TargetUsername: request.TargetUsername,
+	}
+
+	followersResponse, err := usecase.Repository.GetFollower(ctx, followersRequest)
+	if err != nil {
+		return
+	}
+
+	for _, followerResponse := range followersResponse {
+		follower := response.GetFollower{
+			Username: followerResponse.Username,
+		}
+
+		followers = append(followers, follower)
+
+	}
+	return
+}
+
+func (usecase *FollowUsecaseImpl) GetFollowing(ctx context.Context, request request.Follow) (follows []response.GetFollowing, err error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
+	err = usecase.Validate.Var(request.TargetUsername, "required")
+	if err != nil {
+		return
+	}
+
+	followRequest := domain.Follow{
+		TargetUsername: request.TargetUsername,
+	}
+
+	followResponses, err := usecase.Repository.GetFollowing(ctx, followRequest)
+	if err != nil {
+		return
+	}
+
+	for _, followResponse := range followResponses {
+		var follow response.GetFollowing
+		follow.Username = followResponse.Username
+		follows = append(follows, follow)
+	}
+	return
+}

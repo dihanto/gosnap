@@ -178,7 +178,15 @@ func (controller *UserControllerImpl) FindUser(ctx echo.Context) error {
 }
 
 func (controller *UserControllerImpl) FindAllUser(ctx echo.Context) error {
-	users, err := controller.Usecase.FindAllUser(ctx.Request().Context())
+
+	authHeader := ctx.Request().Header.Get("Authorization")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	username, err := helper.GetUsernameFromToken(tokenString)
+	if err != nil {
+		return err
+	}
+
+	users, err := controller.Usecase.FindAllUser(ctx.Request().Context(), username)
 	if err != nil {
 		return err
 	}

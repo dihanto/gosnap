@@ -138,7 +138,7 @@ func (usecase *UserUsecaseImpl) FindUser(ctx context.Context, id uuid.UUID) (res
 	return userResponse, nil
 }
 
-func (usecase *UserUsecaseImpl) FindAllUser(ctx context.Context) (users []response.FindAllUser, err error) {
+func (usecase *UserUsecaseImpl) FindAllUser(ctx context.Context, username string) (users []response.FindAllUser, err error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
@@ -148,10 +148,12 @@ func (usecase *UserUsecaseImpl) FindAllUser(ctx context.Context) (users []respon
 	}
 
 	for _, userRepository := range usersRepository {
-		user := response.FindAllUser{
-			Username: userRepository.Username,
+		if username != userRepository.Username {
+			user := response.FindAllUser{
+				Username: userRepository.Username,
+			}
+			users = append(users, user)
 		}
-		users = append(users, user)
 	}
 
 	return

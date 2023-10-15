@@ -105,10 +105,7 @@ func (usecase *LikeUsecaseImpl) IsLikePhoto(ctx context.Context, request request
 	for _, userId := range userIds {
 		if userId == request.UserId {
 			return true, nil
-		} else {
-			return false, nil
 		}
 	}
-
 	return false, nil
 }

@@ -32,6 +32,8 @@ func (controller *FollowControllerImpl) route(echo *echo.Echo) {
 	followGroup.Use(middleware.Auth)
 	followGroup.POST("/:username", controller.FollowUser)
 	followGroup.DELETE("/:username", controller.UnfollowUser)
+	followGroup.GET("/follower", controller.GetFollower)
+	followGroup.GET("/following", controller.GetFollowing)
 }
 
 func (controller *FollowControllerImpl) FollowUser(ctx echo.Context) (err error) {
@@ -91,4 +93,50 @@ func (controller *FollowControllerImpl) UnfollowUser(ctx echo.Context) (err erro
 		return
 	}
 	return
+}
+
+func (controller *FollowControllerImpl) GetFollower(ctx echo.Context) (err error) {
+	request := request.Follow{}
+	authHeader := ctx.Request().Header.Get("Authorization")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	request.TargetUsername, err = helper.GetUsernameFromToken(tokenString)
+	if err != nil {
+		return
+	}
+
+	followers, err := controller.Usecase.GetFollower(ctx.Request().Context(), request)
+	if err != nil {
+		return
+	}
+
+	webResponse := response.WebResponse{
+		Status:  http.StatusOK,
+		Message: "Success get follower",
+		Data:    followers,
+	}
+
+	return ctx.JSON(http.StatusOK, webResponse)
+}
+
+func (controller *FollowControllerImpl) GetFollowing(ctx echo.Context) (err error) {
+	request := request.Follow{}
+	authHeader := ctx.Request().Header.Get("Authorization")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	request.TargetUsername, err = helper.GetUsernameFromToken(tokenString)
+	if err != nil {
+		return
+	}
+
+	follows, err := controller.Usecase.GetFollowing(ctx.Request().Context(), request)
+	if err != nil {
+		return
+	}
+
+	webResponse := response.WebResponse{
+		Status:  http.StatusOK,
+		Message: "Get following success",
+		Data:    follows,
+	}
+
+	return ctx.JSON(http.StatusOK, webResponse)
 }
