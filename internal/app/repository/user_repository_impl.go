@@ -42,8 +42,8 @@ func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, user dom
 		return domain.User{}, err
 	}
 
-	queryFollow := "INSERT INTO followers (username) VALUES ($1)"
-	_, err = tx.ExecContext(ctx, queryFollow, user.Username)
+	queryFollow := "INSERT INTO followers (user_id, username) VALUES ($1, $2)"
+	_, err = tx.ExecContext(ctx, queryFollow, user.Id, user.Username)
 	if err != nil {
 		return domain.User{}, err
 	}
