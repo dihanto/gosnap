@@ -81,11 +81,11 @@ func (usecase *CommentUsecaseImpl) GetComment(ctx context.Context) ([]response.G
 		for _, photo := range photos {
 			if photo.Id == comment.PhotoId {
 				photoResponse = response.PhotoComment{
-					Id:       photo.Id,
-					Title:    photo.Title,
-					Caption:  photo.Caption,
-					PhotoUrl: photo.PhotoUrl,
-					UserId:   photo.UserId,
+					Id:          photo.Id,
+					Title:       photo.Title,
+					Caption:     photo.Caption,
+					PhotoBase64: photo.PhotoBase64,
+					UserId:      photo.UserId,
 				}
 			}
 		}

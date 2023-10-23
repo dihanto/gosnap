@@ -35,10 +35,10 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request request.
 	}
 
 	photo := domain.Photo{
-		Title:    request.Title,
-		Caption:  request.Caption,
-		PhotoUrl: request.PhotoUrl,
-		UserId:   request.UserId,
+		Title:       request.Title,
+		Caption:     request.Caption,
+		PhotoBase64: request.PhotoBase64,
+		UserId:      request.UserId,
 	}
 
 	photo, err = usecase.Repository.PostPhoto(ctx, photo)
@@ -49,12 +49,12 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request request.
 	tCreate := time.Unix(int64(photo.CreatedAt), 0)
 
 	photoResponse := response.PostPhoto{
-		Id:        photo.Id,
-		Title:     photo.Title,
-		Caption:   photo.Caption,
-		PhotoUrl:  photo.PhotoUrl,
-		UserId:    photo.UserId,
-		CreatedAt: tCreate,
+		Id:          photo.Id,
+		Title:       photo.Title,
+		Caption:     photo.Caption,
+		PhotoBase64: photo.PhotoBase64,
+		UserId:      photo.UserId,
+		CreatedAt:   tCreate,
 	}
 
 	return photoResponse, nil
@@ -95,15 +95,15 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]response.GetPh
 		}
 
 		photoResp := response.GetPhoto{
-			Id:        photo.Id,
-			Title:     photo.Title,
-			Caption:   photo.Caption,
-			PhotoUrl:  photo.PhotoUrl,
-			UserId:    photo.UserId,
-			CreatedAt: tCreate,
-			UpdatedAt: tUpdate,
-			User:      user,
-			Likes:     like,
+			Id:          photo.Id,
+			Title:       photo.Title,
+			Caption:     photo.Caption,
+			PhotoBase64: photo.PhotoBase64,
+			UserId:      photo.UserId,
+			CreatedAt:   tCreate,
+			UpdatedAt:   tUpdate,
+			User:        user,
+			Likes:       like,
 		}
 
 		photoResponse = append(photoResponse, photoResp)
@@ -122,11 +122,11 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request reques
 	}
 
 	photo := domain.Photo{
-		Id:       request.Id,
-		Title:    request.Title,
-		Caption:  request.Caption,
-		PhotoUrl: request.PhotoUrl,
-		UserId:   request.UserId,
+		Id:          request.Id,
+		Title:       request.Title,
+		Caption:     request.Caption,
+		PhotoBase64: request.PhotoBase64,
+		UserId:      request.UserId,
 	}
 
 	photo, err = usecase.Repository.UpdatePhoto(ctx, photo)
@@ -135,13 +135,13 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request reques
 	}
 
 	photoResponse := response.UpdatePhoto{
-		Id:        photo.Id,
-		Title:     photo.Title,
-		Caption:   photo.Caption,
-		PhotoUrl:  photo.PhotoUrl,
-		UserId:    photo.UserId,
-		UpdatedAt: time.Unix(int64(photo.UpdatedAt), 0),
-		CreatedAt: time.Unix(int64(photo.CreatedAt), 0),
+		Id:          photo.Id,
+		Title:       photo.Title,
+		Caption:     photo.Caption,
+		PhotoBase64: photo.PhotoBase64,
+		UserId:      photo.UserId,
+		UpdatedAt:   time.Unix(int64(photo.UpdatedAt), 0),
+		CreatedAt:   time.Unix(int64(photo.CreatedAt), 0),
 	}
 
 	return photoResponse, nil

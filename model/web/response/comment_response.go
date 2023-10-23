@@ -38,9 +38,9 @@ type UserComment struct {
 	Username string    `json:"username"`
 }
 type PhotoComment struct {
-	Id       int       `json:"id"`
-	Title    string    `json:"title"`
-	Caption  string    `json:"caption"`
-	PhotoUrl string    `json:"photoUrl"`
-	UserId   uuid.UUID `json:"UserId"`
+	Id          int       `json:"id"`
+	Title       string    `json:"title"`
+	Caption     string    `json:"caption"`
+	PhotoBase64 string    `json:"photoBase64"`
+	UserId      uuid.UUID `json:"UserId"`
 }

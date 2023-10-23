@@ -48,7 +48,7 @@ func (repository *CommentRepositoryImpl) GetComment(ctx context.Context) ([]doma
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "SELECT comments.id, comments.message, comments.photo_id, comments.user_id, comments.created_at, comments.updated_at, users.id, users.email, users.username, photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id FROM comments JOIN photos ON comments.photo_id = photos.id JOIN users ON comments.user_id = users.id WHERE comments.deleted_at IS NULL;"
+	query := "SELECT comments.id, comments.message, comments.photo_id, comments.user_id, comments.created_at, comments.updated_at, users.id, users.email, users.username, photos.id, photos.title, photos.caption, photos.photo_base64, photos.user_id FROM comments JOIN photos ON comments.photo_id = photos.id JOIN users ON comments.user_id = users.id WHERE comments.deleted_at IS NULL;"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
 		return []domain.Comment{}, []domain.User{}, []domain.Photo{}, err
@@ -63,7 +63,7 @@ func (repository *CommentRepositoryImpl) GetComment(ctx context.Context) ([]doma
 		var comment domain.Comment
 		var user domain.User
 		var photo domain.Photo
-		err = rows.Scan(&comment.Id, &comment.Message, &comment.PhotoId, &comment.UserId, &comment.CreatedAt, &comment.UpdatedAt, &user.Id, &user.Email, &user.Username, &photo.Id, &photo.Title, &photo.Caption, &photo.PhotoUrl, &photo.UserId)
+		err = rows.Scan(&comment.Id, &comment.Message, &comment.PhotoId, &comment.UserId, &comment.CreatedAt, &comment.UpdatedAt, &user.Id, &user.Email, &user.Username, &photo.Id, &photo.Title, &photo.Caption, &photo.PhotoBase64, &photo.UserId)
 		if err != nil {
 			return []domain.Comment{}, []domain.User{}, []domain.Photo{}, err
 		}

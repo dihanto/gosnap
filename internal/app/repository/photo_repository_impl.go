@@ -30,8 +30,8 @@ func (repository *PhotoRepositoryImpl) PostPhoto(ctx context.Context, photo doma
 
 	photo.CreatedAt = int32(time.Now().Unix())
 
-	query := "INSERT INTO photos( title, caption, photo_url, user_id, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
-	row := tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoUrl, photo.UserId, photo.CreatedAt)
+	query := "INSERT INTO photos( title, caption, photo_base64, user_id, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+	row := tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoBase64, photo.UserId, photo.CreatedAt)
 	err = row.Scan(&photo.Id)
 	if err != nil {
 		return domain.Photo{}, err
@@ -53,7 +53,7 @@ func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context) ([]domain.P
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "SELECT photos.id, photos.title, photos.caption, photos.photo_url, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email, likes.like_count FROM photos JOIN users ON photos.user_id = users.id JOIN likes ON photos.id = likes.photo_id WHERE photos.deleted_at IS NULL;"
+	query := "SELECT photos.id, photos.title, photos.caption, photos.photo_base64, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email, likes.like_count FROM photos JOIN users ON photos.user_id = users.id JOIN likes ON photos.id = likes.photo_id WHERE photos.deleted_at IS NULL;"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
 		return []domain.Photo{}, []domain.User{}, []domain.Like{}, err
@@ -67,7 +67,7 @@ func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context) ([]domain.P
 		photo := domain.Photo{}
 		user := domain.User{}
 		like := domain.Like{}
-		err := rows.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.PhotoUrl, &photo.UserId, &photo.CreatedAt, &photo.UpdatedAt, &user.Username, &user.Email, &like.LikeCount)
+		err := rows.Scan(&photo.Id, &photo.Title, &photo.Caption, &photo.PhotoBase64, &photo.UserId, &photo.CreatedAt, &photo.UpdatedAt, &user.Username, &user.Email, &like.LikeCount)
 		if err != nil {
 			return []domain.Photo{}, []domain.User{}, []domain.Like{}, err
 		}
@@ -90,8 +90,8 @@ func (repository *PhotoRepositoryImpl) UpdatePhoto(ctx context.Context, photo do
 
 	photo.UpdatedAt = int32(time.Now().Unix())
 
-	query := "UPDATE photos SET title=$1, caption=$2, photo_url=$3, user_id=$4, updated_at=$5 WHERE id=$6 RETURNING created_at"
-	row := tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoUrl, photo.UserId, photo.UpdatedAt, photo.Id)
+	query := "UPDATE photos SET title=$1, caption=$2, photo_base64=$3, user_id=$4, updated_at=$5 WHERE id=$6 RETURNING created_at"
+	row := tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoBase64, photo.UserId, photo.UpdatedAt, photo.Id)
 
 	err = row.Scan(&photo.CreatedAt)
 	if err != nil {

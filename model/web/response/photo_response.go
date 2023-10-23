@@ -7,34 +7,34 @@ import (
 )
 
 type PostPhoto struct {
-	Id        int       `json:"id"`
-	Title     string    `json:"title"`
-	Caption   string    `json:"caption"`
-	PhotoUrl  string    `json:"photoUrl"`
-	UserId    uuid.UUID `json:"userId"`
-	CreatedAt time.Time `json:"createdAt"`
+	Id          int       `json:"id"`
+	Title       string    `json:"title"`
+	Caption     string    `json:"caption"`
+	PhotoBase64 string    `json:"photoBase64"`
+	UserId      uuid.UUID `json:"userId"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type UpdatePhoto struct {
-	Id        int       `json:"id"`
-	Title     string    `json:"title"`
-	Caption   string    `json:"caption"`
-	PhotoUrl  string    `json:"photoUrl"`
-	UserId    uuid.UUID `json:"userId"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	Id          int       `json:"id"`
+	Title       string    `json:"title"`
+	Caption     string    `json:"caption"`
+	PhotoBase64 string    `json:"photoBase64"`
+	UserId      uuid.UUID `json:"userId"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
 type GetPhoto struct {
-	Id        int       `json:"id"`
-	Title     string    `json:"title"`
-	Caption   string    `json:"caption"`
-	PhotoUrl  string    `json:"photoUrl"`
-	UserId    uuid.UUID `json:"userId"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	User      User      `json:"user"`
-	Likes     Likes     `json:"like"`
+	Id          int       `json:"id"`
+	Title       string    `json:"title"`
+	Caption     string    `json:"caption"`
+	PhotoBase64 string    `json:"photoBase64"`
+	UserId      uuid.UUID `json:"userId"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	User        User      `json:"user"`
+	Likes       Likes     `json:"like"`
 }
 
 type Likes struct {

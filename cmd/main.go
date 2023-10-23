@@ -24,7 +24,7 @@ func main() {
 	router := echo.New()
 	router.HTTPErrorHandler = exception.ErrorHandler
 	router.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:3000"},
+		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
 	}))
 
