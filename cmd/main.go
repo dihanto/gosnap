@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/dihanto/gosnap/internal/app/config"
 	"github.com/dihanto/gosnap/internal/app/controller"
 	"github.com/dihanto/gosnap/internal/app/exception"
@@ -32,7 +34,10 @@ func main() {
 	defer logFile.Close()
 	middleware.SnapLogger(router, logFile)
 
-	databaseConnection, _ := config.InitDatabaseConnection()
+	databaseConnection, err := config.InitDatabaseConnection()
+	if err != nil {
+		log.Fatalln(err)
+	}
 	validate := validator.New()
 	validate.RegisterValidation("email_uniq", helper.ValidateEmailUniq)
 	validate.RegisterValidation("username_uniq", helper.ValidateUsernameUniq)

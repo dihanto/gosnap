@@ -26,6 +26,10 @@ func InitDatabaseConnection() (db *sql.DB, err error) {
 	if err != nil {
 		return
 	}
+	err = db.Ping()
+	if err != nil {
+		return
+	}
 
 	db.SetConnMaxIdleTime(connMaxIdleTime * time.Second)
 	db.SetConnMaxLifetime(connMaxLifeTime * time.Second)
