@@ -79,6 +79,9 @@ func main() {
 		controller.NewLikeController(likeUsecase, router)
 	}
 
-	router.Start(serverHost + ":" + serverPort)
+	err = router.Start(serverHost + ":" + serverPort)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 }
