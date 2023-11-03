@@ -107,7 +107,7 @@ func (usecase *FollowUsecaseImpl) GetFollower(ctx context.Context, request reque
 	return
 }
 
-func (usecase *FollowUsecaseImpl) GetFollowing(ctx context.Context, request request.Follow) (follows []response.GetFollowing, err error) {
+func (usecase *FollowUsecaseImpl) GetFollowing(ctx context.Context, request request.Follow) (follows response.GetFollowing, err error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
@@ -126,9 +126,9 @@ func (usecase *FollowUsecaseImpl) GetFollowing(ctx context.Context, request requ
 	}
 
 	for _, followResponse := range followResponses {
-		var follow response.GetFollowing
-		follow.Username = followResponse.Username
-		follows = append(follows, follow)
+		follows.Username = append(follows.Username, followResponse.Username)
 	}
+	follows.FollowingCount = len(follows.Username)
+
 	return
 }

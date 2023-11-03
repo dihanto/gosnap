@@ -9,5 +9,6 @@ type GetFollower struct {
 	FollowerCount int      `json:"followerCount"`
 }
 type GetFollowing struct {
-	Username string `json:"username"`
+	Username       []string `json:"username"`
+	FollowingCount int      `json:"followingCount"`
 }
