@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS users DROP COLUMN profile_picture_base64;

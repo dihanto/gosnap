@@ -23,8 +23,9 @@ type UserUpdate struct {
 }
 
 type FindUser struct {
-	Username string `json:"username"`
-	Name     string `json:"name"`
+	Username       string `json:"username"`
+	Name           string `json:"name"`
+	ProfilePicture string `json:"profilePicture"`
 }
 
 type FindAllUser struct {
