@@ -136,8 +136,8 @@ func (repository *UserRepositoryImpl) FindUser(ctx context.Context, id uuid.UUID
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "SELECT username, name FROM users WHERE id=$1"
-	err = tx.QueryRowContext(ctx, query, id).Scan(&user.Username, &user.Name)
+	query := "SELECT username, name, profile_picture_base64 FROM users WHERE id=$1"
+	err = tx.QueryRowContext(ctx, query, id).Scan(&user.Username, &user.Name, &user.ProfilePicture)
 	if err != nil {
 		return
 	}

@@ -131,8 +131,9 @@ func (usecase *UserUsecaseImpl) FindUser(ctx context.Context, id uuid.UUID) (res
 	}
 
 	userResponse := response.FindUser{
-		Username: user.Username,
-		Name:     user.Name,
+		Username:       user.Username,
+		Name:           user.Name,
+		ProfilePicture: user.ProfilePicture,
 	}
 
 	return userResponse, nil
