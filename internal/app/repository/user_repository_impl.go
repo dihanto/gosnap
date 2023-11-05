@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/helper"
@@ -87,8 +88,42 @@ func (repository *UserRepositoryImpl) UserUpdate(ctx context.Context, user domai
 	defer helper.CommitOrRollback(tx, &err)
 
 	user.UpdatedAt = int32(time.Now().Unix())
-	query := "UPDATE users SET email=$1, username=$2, updated_at=$3 WHERE id=$4"
-	_, err = tx.ExecContext(ctx, query, user.Email, user.Username, user.UpdatedAt, user.Id)
+	query := "UPDATE users SET"
+	params := []interface{}{}
+	paramCount := 1
+
+	if user.Email != "" {
+		query += " email = $" + strconv.Itoa(paramCount)
+		params = append(params, user.Email)
+		paramCount++
+	}
+
+	if user.Username != "" {
+		if paramCount > 1 {
+			query += ","
+		}
+		query += " username = $" + strconv.Itoa(paramCount)
+		params = append(params, user.Username)
+		paramCount++
+	}
+
+	if user.ProfilePicture != "" {
+		if paramCount > 1 {
+			query += ","
+		}
+		query += " profile_picture_base64 = $" + strconv.Itoa(paramCount)
+		params = append(params, user.ProfilePicture)
+		paramCount++
+	}
+
+	query += ", updated_at = $" + strconv.Itoa(paramCount)
+	params = append(params, user.UpdatedAt)
+	paramCount++
+
+	query += " WHERE id = $" + strconv.Itoa(paramCount)
+	params = append(params, user.Id)
+
+	_, err = tx.ExecContext(ctx, query, params...)
 	if err != nil {
 		return domain.User{}, err
 	}

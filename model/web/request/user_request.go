@@ -15,7 +15,8 @@ type UserLogin struct {
 }
 
 type UserUpdate struct {
-	Id       uuid.UUID `json:"id"`
-	Username string    `validate:"required" json:"username"`
-	Email    string    `validate:"required,email" json:"email"`
+	Id             uuid.UUID `json:"id"`
+	Username       string    `json:"username"`
+	Email          string    `json:"email"`
+	ProfilePicture string    `json:"profilePicture"`
 }

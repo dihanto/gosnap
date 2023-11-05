@@ -82,9 +82,10 @@ func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request request.
 	}
 
 	userReq := domain.User{
-		Id:       request.Id,
-		Username: request.Username,
-		Email:    request.Email,
+		Id:             request.Id,
+		Username:       request.Username,
+		Email:          request.Email,
+		ProfilePicture: request.ProfilePicture,
 	}
 
 	userResponse, err := usecase.Repository.UserUpdate(ctx, userReq)
@@ -94,11 +95,12 @@ func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request request.
 
 	tUpdate := time.Unix(int64(userResponse.UpdatedAt), 0)
 	user := response.UserUpdate{
-		Id:        userResponse.Id,
-		Email:     userResponse.Email,
-		Username:  userResponse.Username,
-		Age:       userResponse.Age,
-		UpdatedAt: tUpdate,
+		Id:             userResponse.Id,
+		Email:          userResponse.Email,
+		Username:       userResponse.Username,
+		Age:            userResponse.Age,
+		ProfilePicture: userResponse.ProfilePicture,
+		UpdatedAt:      tUpdate,
 	}
 
 	return user, nil

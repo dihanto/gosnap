@@ -15,11 +15,12 @@ type UserRegister struct {
 }
 
 type UserUpdate struct {
-	Id        uuid.UUID `json:"id"`
-	Email     string    `json:"email"`
-	Username  string    `json:"username"`
-	Age       int       `json:"age"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	Id             uuid.UUID `json:"id"`
+	Email          string    `json:"email"`
+	Username       string    `json:"username"`
+	Age            int       `json:"age"`
+	ProfilePicture string    `json:"profilePicture"`
+	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
 type FindUser struct {
