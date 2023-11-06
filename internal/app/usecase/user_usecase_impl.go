@@ -153,7 +153,8 @@ func (usecase *UserUsecaseImpl) FindAllUser(ctx context.Context, username string
 	for _, userRepository := range usersRepository {
 		if username != userRepository.Username {
 			user := response.FindAllUser{
-				Username: userRepository.Username,
+				Username:       userRepository.Username,
+				ProfilePicture: userRepository.ProfilePicture,
 			}
 			users = append(users, user)
 		}

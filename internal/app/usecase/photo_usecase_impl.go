@@ -78,8 +78,9 @@ func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]response.GetPh
 		for _, u := range users {
 			if u.Id == photo.UserId {
 				user = response.User{
-					Username: u.Username,
-					Email:    u.Email,
+					Username:       u.Username,
+					Email:          u.Email,
+					ProfilePicture: u.ProfilePicture,
 				}
 				break
 			}

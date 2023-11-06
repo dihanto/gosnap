@@ -188,7 +188,7 @@ func (repository *UserRepositoryImpl) FindAllUser(ctx context.Context) (users []
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "SELECT username FROM users"
+	query := "SELECT username, profile_picture_base64 FROM users"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
 		return
@@ -197,7 +197,7 @@ func (repository *UserRepositoryImpl) FindAllUser(ctx context.Context) (users []
 
 	for rows.Next() {
 		var user domain.User
-		err = rows.Scan(&user.Username)
+		err = rows.Scan(&user.Username, &user.ProfilePicture)
 		if err != nil {
 			return
 		}

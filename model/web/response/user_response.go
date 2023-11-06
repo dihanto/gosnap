@@ -30,5 +30,6 @@ type FindUser struct {
 }
 
 type FindAllUser struct {
-	Username string `json:"username"`
+	Username       string `json:"username"`
+	ProfilePicture string `json:"profilePicture"`
 }
