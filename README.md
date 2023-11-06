@@ -7,7 +7,7 @@ GoSnap is a powerful API built using the Go programming language that enables us
 ## Features
 
 - **Photo Upload**: Users can upload their photos to share their special moments with others.
-
+- **Follow Users** : Users can follow each other.
 - **Like and Comment**: Users can like and comment on the photos uploaded by other users, fostering engagement and interaction within the community.
 
 ## File Structure
@@ -35,8 +35,8 @@ To get started with GoSnap, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/dihanto/gosnap.git`
 2. Navigate to the project directory: `cd gosnap`
-3. Install dependencies: `go get ./...`
-4. Configure the application by updating the files in the `/internal/config/` directory as per your requirements.
+3. Install dependencies: `go mod tidy`
+4. Configure the application by adding the files in the `/cmd/config.json` directory as per your requirements.
 5. Run the application: `go run cmd/main.go`
 6. The GoSnap API will be accessible at `http://localhost:8000`.
 
