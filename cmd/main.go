@@ -18,7 +18,7 @@ import (
 
 func main() {
 
-	config.InitLoadConfigurationMain()
+	config.InitLoadConfiguration()
 	serverHost := viper.GetString("server.host")
 	serverPort := viper.GetString("server.port")
 	usecaseTimeout := viper.GetInt("usecase.timeout")
