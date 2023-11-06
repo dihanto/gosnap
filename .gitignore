@@ -1,3 +1,11 @@
+# Ignore all files with a .config extension
 *.config
+
+# Ignore all JSON files in the .cmd directory
+.cmd/*.json
+
+# Ignore the entire .vscode directory
 .vscode/
+
+# Ignore all files with a .txt extension
 *.txt
