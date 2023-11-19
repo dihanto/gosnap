@@ -32,7 +32,7 @@ func (photoControllerImpl *PhotoControllerImpl) route(echo *echo.Echo) {
 	photosGroup := echo.Group("/photos")
 	photosGroup.Use(middleware.Auth)
 	photosGroup.POST("", photoControllerImpl.PostPhoto)
-	photosGroup.GET("/", photoControllerImpl.GetPhoto)
+	photosGroup.GET("", photoControllerImpl.GetPhoto)
 	photosGroup.PUT("/:photoId", photoControllerImpl.UpdatePhoto)
 	photosGroup.DELETE("/:photoId", photoControllerImpl.DeletePhoto)
 }
@@ -67,9 +67,13 @@ func (controller *PhotoControllerImpl) PostPhoto(ctx echo.Context) error {
 }
 
 func (controller *PhotoControllerImpl) GetPhoto(ctx echo.Context) error {
-	limit := ctx.QueryParam("limit")
 
-	photoResponse, err := controller.Usecase.GetPhoto(ctx.Request().Context(), limit)
+	page := ctx.QueryParam("page")
+	if page == "" {
+		page = "0"
+	}
+
+	photoResponse, err := controller.Usecase.GetPhoto(ctx.Request().Context(), page)
 	if err != nil {
 		return err
 	}

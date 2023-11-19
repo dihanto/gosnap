@@ -9,7 +9,7 @@ import (
 
 type PhotoUsecase interface {
 	PostPhoto(ctx context.Context, request request.Photo) (response.PostPhoto, error)
-	GetPhoto(ctx context.Context) ([]response.GetPhoto, error)
+	GetPhoto(ctx context.Context, page string) ([]response.GetPhoto, error)
 	UpdatePhoto(ctx context.Context, request request.Photo) (response.UpdatePhoto, error)
 	DeletePhoto(ctx context.Context, id int) error
 }

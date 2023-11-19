@@ -46,15 +46,20 @@ func (repository *PhotoRepositoryImpl) PostPhoto(ctx context.Context, photo doma
 }
 
 // GetPhoto is a method to retrieve all photo entries and their associated users from the database.
-func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context) ([]domain.Photo, []domain.User, []domain.Like, error) {
+func (repository *PhotoRepositoryImpl) GetPhoto(ctx context.Context, limit int, offset int) ([]domain.Photo, []domain.User, []domain.Like, error) {
 	tx, err := repository.Database.Begin()
 	if err != nil {
 		return []domain.Photo{}, []domain.User{}, []domain.Like{}, err
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "SELECT photos.id, photos.title, photos.caption, photos.photo_base64, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email, users.profile_picture_base64, likes.like_count FROM photos JOIN users ON photos.user_id = users.id JOIN likes ON photos.id = likes.photo_id WHERE photos.deleted_at IS NULL;"
-	rows, err := tx.QueryContext(ctx, query)
+	query := "SELECT photos.id, photos.title, photos.caption, photos.photo_base64, photos.user_id, photos.created_at, photos.updated_at, users.username, users.email, users.profile_picture_base64, likes.like_count FROM photos JOIN users ON photos.user_id = users.id JOIN likes ON photos.id = likes.photo_id WHERE photos.deleted_at IS NULL"
+	params := []interface{}{}
+	if offset >= 0 {
+		query += " LIMIT $1 OFFSET $2"
+		params = append(params, limit, offset)
+	}
+	rows, err := tx.QueryContext(ctx, query, params...)
 	if err != nil {
 		return []domain.Photo{}, []domain.User{}, []domain.Like{}, err
 	}

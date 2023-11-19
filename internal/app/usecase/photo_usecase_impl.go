@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/dihanto/gosnap/internal/app/repository"
@@ -60,11 +61,24 @@ func (usecase *PhotoUsecaseImpl) PostPhoto(ctx context.Context, request request.
 	return photoResponse, nil
 }
 
-func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context) ([]response.GetPhoto, error) {
+func (usecase *PhotoUsecaseImpl) GetPhoto(ctx context.Context, page string) ([]response.GetPhoto, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
 	defer cancel()
 
-	photos, users, likes, err := usecase.Repository.GetPhoto(ctx)
+	limit := 3
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		return []response.GetPhoto{}, err
+	}
+
+	var offset int
+	if pageInt == 1 {
+		offset = 0
+	} else {
+		offset = (pageInt - 1) * limit
+	}
+
+	photos, users, likes, err := usecase.Repository.GetPhoto(ctx, limit, offset)
 	if err != nil {
 		return nil, err
 	}
