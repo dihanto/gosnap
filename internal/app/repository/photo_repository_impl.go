@@ -131,3 +131,35 @@ func (repository *PhotoRepositoryImpl) DeletePhoto(ctx context.Context, id int) 
 
 	return nil
 }
+
+func (repository *PhotoRepositoryImpl) GetPhotoById(ctx context.Context, photoId int) (domain.Photo, domain.User, domain.Like, error) {
+	tx, err := repository.Database.Begin()
+	if err != nil {
+		return domain.Photo{}, domain.User{}, domain.Like{}, err
+	}
+	defer helper.CommitOrRollback(tx, &err)
+
+	photo := domain.Photo{}
+	photoQuery := "SELECT caption, photo_base64, user_id FROM photos WHERE id=$1"
+	err = tx.QueryRowContext(ctx, photoQuery, photoId).Scan(&photo.Caption, &photo.PhotoBase64, &photo.UserId)
+	if err != nil {
+		return domain.Photo{}, domain.User{}, domain.Like{}, err
+	}
+
+	user := domain.User{}
+	userQuery := "SELECT username, name, profile_picture_base64 FROM users WHERE id=$1"
+	err = tx.QueryRowContext(ctx, userQuery, photo.UserId).Scan(&user.Username, &user.Name, &user.ProfilePicture)
+	if err != nil {
+		return domain.Photo{}, domain.User{}, domain.Like{}, err
+	}
+
+	like := domain.Like{}
+	likeQuery := "SELECT like_count from likes WHERE photo_id=$1"
+	err = tx.QueryRowContext(ctx, likeQuery, photoId).Scan(&like.LikeCount)
+	if err != nil {
+		return domain.Photo{}, domain.User{}, domain.Like{}, err
+	}
+
+	return photo, user, like, nil
+
+}

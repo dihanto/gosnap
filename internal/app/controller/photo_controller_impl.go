@@ -35,6 +35,7 @@ func (photoControllerImpl *PhotoControllerImpl) route(echo *echo.Echo) {
 	photosGroup.GET("", photoControllerImpl.GetPhoto)
 	photosGroup.PUT("/:photoId", photoControllerImpl.UpdatePhoto)
 	photosGroup.DELETE("/:photoId", photoControllerImpl.DeletePhoto)
+	photosGroup.GET("/:photoId", photoControllerImpl.GetPhotoById)
 }
 
 func (controller *PhotoControllerImpl) PostPhoto(ctx echo.Context) error {
@@ -132,7 +133,27 @@ func (controller *PhotoControllerImpl) DeletePhoto(ctx echo.Context) error {
 
 	webResponse := response.WebResponse{
 		Status:  http.StatusOK,
-		Message: "Your photo has been successfully deleted",
+		Message: "Photo has been successfully deleted",
+	}
+
+	return ctx.JSON(http.StatusOK, webResponse)
+}
+
+func (controller *PhotoControllerImpl) GetPhotoById(ctx echo.Context) error {
+	id, err := strconv.Atoi(ctx.Param("photoId"))
+	if err != nil {
+		return err
+	}
+
+	photo, err := controller.Usecase.GetPhotoById(ctx.Request().Context(), id)
+	if err != nil {
+		return err
+	}
+
+	webResponse := response.WebResponse{
+		Status:  http.StatusOK,
+		Message: "Get photo success",
+		Data:    photo,
 	}
 
 	return ctx.JSON(http.StatusOK, webResponse)

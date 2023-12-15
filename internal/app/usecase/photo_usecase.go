@@ -12,4 +12,5 @@ type PhotoUsecase interface {
 	GetPhoto(ctx context.Context, page string) ([]response.GetPhoto, error)
 	UpdatePhoto(ctx context.Context, request request.Photo) (response.UpdatePhoto, error)
 	DeletePhoto(ctx context.Context, id int) error
+	GetPhotoById(ctx context.Context, id int) (response.GetPhoto, error)
 }

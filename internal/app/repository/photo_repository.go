@@ -11,4 +11,5 @@ type PhotoRepository interface {
 	GetPhoto(ctx context.Context, limit int, offset int) ([]domain.Photo, []domain.User, []domain.Like, error)
 	UpdatePhoto(ctx context.Context, photo domain.Photo) (domain.Photo, error)
 	DeletePhoto(ctx context.Context, id int) error
+	GetPhotoById(ctx context.Context, photoId int) (domain.Photo, domain.User, domain.Like, error)
 }

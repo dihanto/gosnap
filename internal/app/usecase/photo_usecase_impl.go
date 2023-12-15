@@ -173,3 +173,33 @@ func (usecase *PhotoUsecaseImpl) DeletePhoto(ctx context.Context, id int) error 
 
 	return nil
 }
+
+func (usecase *PhotoUsecaseImpl) GetPhotoById(ctx context.Context, id int) (response.GetPhoto, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(usecase.Timeout)*time.Second)
+	defer cancel()
+
+	photo, user, like, err := usecase.Repository.GetPhotoById(ctx, id)
+	if err != nil {
+		return response.GetPhoto{}, err
+	}
+
+	userResponse := response.User{
+		Username:       user.Username,
+		ProfilePicture: user.ProfilePicture,
+	}
+
+	likeResponse := response.Likes{
+		LikeCount: like.LikeCount,
+	}
+
+	photoResponse := response.GetPhoto{
+		Id:          id,
+		Caption:     photo.Caption,
+		PhotoBase64: photo.PhotoBase64,
+		UserId:      photo.UserId,
+		User:        userResponse,
+		Likes:       likeResponse,
+	}
+
+	return photoResponse, nil
+}
