@@ -3,9 +3,9 @@ package request
 import "github.com/google/uuid"
 
 type Photo struct {
-	Id          int       `json:"id"`
-	Title       string    `validate:"required" json:"title"`
+	Id          int       `validate:"required" json:"id"`
+	Title       string    `json:"title"`
 	Caption     string    `json:"caption"`
-	PhotoBase64 string    `validate:"required" json:"photoBase64"`
+	PhotoBase64 string    `json:"photoBase64"`
 	UserId      uuid.UUID `json:"userId"`
 }

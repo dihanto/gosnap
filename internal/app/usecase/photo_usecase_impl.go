@@ -137,11 +137,9 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request reques
 	}
 
 	photo := domain.Photo{
-		Id:          request.Id,
-		Title:       request.Title,
-		Caption:     request.Caption,
-		PhotoBase64: request.PhotoBase64,
-		UserId:      request.UserId,
+		Id:      request.Id,
+		Caption: request.Caption,
+		UserId:  request.UserId,
 	}
 
 	photo, err = usecase.Repository.UpdatePhoto(ctx, photo)
@@ -151,7 +149,6 @@ func (usecase *PhotoUsecaseImpl) UpdatePhoto(ctx context.Context, request reques
 
 	photoResponse := response.UpdatePhoto{
 		Id:          photo.Id,
-		Title:       photo.Title,
 		Caption:     photo.Caption,
 		PhotoBase64: photo.PhotoBase64,
 		UserId:      photo.UserId,

@@ -17,7 +17,6 @@ type PostPhoto struct {
 
 type UpdatePhoto struct {
 	Id          int       `json:"id"`
-	Title       string    `json:"title"`
 	Caption     string    `json:"caption"`
 	PhotoBase64 string    `json:"photoBase64"`
 	UserId      uuid.UUID `json:"userId"`

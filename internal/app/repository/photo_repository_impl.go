@@ -95,8 +95,8 @@ func (repository *PhotoRepositoryImpl) UpdatePhoto(ctx context.Context, photo do
 
 	photo.UpdatedAt = int32(time.Now().Unix())
 
-	query := "UPDATE photos SET title=$1, caption=$2, photo_base64=$3, user_id=$4, updated_at=$5 WHERE id=$6 RETURNING created_at"
-	row := tx.QueryRowContext(ctx, query, photo.Title, photo.Caption, photo.PhotoBase64, photo.UserId, photo.UpdatedAt, photo.Id)
+	query := "UPDATE photos SET caption=$1, user_id=$2, updated_at=$3 WHERE id=$4 RETURNING created_at"
+	row := tx.QueryRowContext(ctx, query, photo.Caption, photo.UserId, photo.UpdatedAt, photo.Id)
 
 	err = row.Scan(&photo.CreatedAt)
 	if err != nil {
