@@ -8,7 +8,6 @@ type User struct {
 	Name           string
 	Email          string
 	Password       string
-	Age            int
 	ProfilePicture string
 	CreatedAt      int32
 	UpdatedAt      int32

@@ -37,8 +37,8 @@ func (repository *UserRepositoryImpl) UserRegister(ctx context.Context, user dom
 		return domain.User{}, err
 	}
 
-	query := "INSERT INTO users (id, username, name, email, password, age, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)"
-	_, err = tx.ExecContext(ctx, query, user.Id, user.Username, user.Name, user.Email, password, user.Age, user.CreatedAt)
+	query := "INSERT INTO users (id, username, name, email, password, created_at) VALUES ($1, $2, $3, $4, $5, $6)"
+	_, err = tx.ExecContext(ctx, query, user.Id, user.Username, user.Name, user.Email, password, user.CreatedAt)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -126,20 +126,6 @@ func (repository *UserRepositoryImpl) UserUpdate(ctx context.Context, user domai
 	_, err = tx.ExecContext(ctx, query, params...)
 	if err != nil {
 		return domain.User{}, err
-	}
-
-	queryAge := "SELECT age FROM users WHERE id=$1"
-	rows, err := tx.QueryContext(ctx, queryAge, user.Id)
-	if err != nil {
-		return domain.User{}, err
-	}
-	defer rows.Close()
-
-	if rows.Next() {
-		err = rows.Scan(&user.Age)
-		if err != nil {
-			return domain.User{}, err
-		}
 	}
 
 	return user, nil

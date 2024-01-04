@@ -39,7 +39,6 @@ func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request reques
 		Username: request.Username,
 		Name:     request.Name,
 		Password: request.Password,
-		Age:      request.Age,
 	}
 	user.Id = uuid.New()
 
@@ -53,7 +52,6 @@ func (usecase *UserUsecaseImpl) UserRegister(ctx context.Context, request reques
 		Email:     user.Email,
 		Username:  user.Username,
 		Password:  user.Password,
-		Age:       user.Age,
 		CreatedAT: tCreate,
 	}
 
@@ -98,7 +96,6 @@ func (usecase *UserUsecaseImpl) UserUpdate(ctx context.Context, request request.
 		Id:             userResponse.Id,
 		Email:          userResponse.Email,
 		Username:       userResponse.Username,
-		Age:            userResponse.Age,
 		ProfilePicture: userResponse.ProfilePicture,
 		UpdatedAt:      tUpdate,
 	}

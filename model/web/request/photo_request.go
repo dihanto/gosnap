@@ -3,7 +3,7 @@ package request
 import "github.com/google/uuid"
 
 type Photo struct {
-	Id          int       `validate:"required" json:"id"`
+	Id          int       `json:"id"`
 	Title       string    `json:"title"`
 	Caption     string    `json:"caption"`
 	PhotoBase64 string    `json:"photoBase64"`
