@@ -25,6 +25,10 @@ func ErrorHandler(err error, ctx echo.Context) {
 		unauthorizedError(err, ctx)
 		return
 	}
+	if strings.Contains(err.Error(), "unauthorized") {
+		unauthorizedError(err, ctx)
+		return
+	}
 	if err == sql.ErrNoRows {
 		notFoundError(err, ctx)
 		return

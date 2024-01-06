@@ -8,6 +8,7 @@ import (
 
 	"github.com/dihanto/gosnap/internal/app/helper"
 	"github.com/dihanto/gosnap/model/domain"
+	"github.com/google/uuid"
 )
 
 type PhotoRepositoryImpl struct {
@@ -95,12 +96,16 @@ func (repository *PhotoRepositoryImpl) UpdatePhoto(ctx context.Context, photo do
 
 	photo.UpdatedAt = int32(time.Now().Unix())
 
-	query := "UPDATE photos SET caption=$1, user_id=$2, updated_at=$3 WHERE id=$4 RETURNING created_at"
-	row := tx.QueryRowContext(ctx, query, photo.Caption, photo.UserId, photo.UpdatedAt, photo.Id)
-
-	err = row.Scan(&photo.CreatedAt)
+	var userIdResponse uuid.UUID
+	query := "UPDATE photos SET caption=$1, updated_at=$2 WHERE id=$3 RETURNING user_id"
+	row := tx.QueryRowContext(ctx, query, photo.Caption, photo.UpdatedAt, photo.Id)
+	err = row.Scan(&userIdResponse)
 	if err != nil {
 		return domain.Photo{}, err
+	}
+	if photo.UserId != userIdResponse {
+		errr := errors.New("unauthorized")
+		return domain.Photo{}, errr
 	}
 
 	return photo, nil
