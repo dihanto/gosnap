@@ -62,7 +62,7 @@ func (repository *UserRepositoryImpl) UserLogin(ctx context.Context, username st
 
 	var pwd string
 	var id uuid.UUID
-	query := "SELECT password, id FROM users WHERE username = $1;"
+	query := "SELECT password, id FROM users WHERE username = $1 AND deleted_at is NULL;"
 	err = tx.QueryRowContext(ctx, query, username).Scan(&pwd, &id)
 	if err == sql.ErrNoRows {
 		return false, uuid.Nil, err
@@ -174,7 +174,7 @@ func (repository *UserRepositoryImpl) FindAllUser(ctx context.Context) (users []
 	}
 	defer helper.CommitOrRollback(tx, &err)
 
-	query := "SELECT username, profile_picture_base64 FROM users"
+	query := "SELECT username, profile_picture_base64 FROM users WHERE deleted_at is NULL"
 	rows, err := tx.QueryContext(ctx, query)
 	if err != nil {
 		return
