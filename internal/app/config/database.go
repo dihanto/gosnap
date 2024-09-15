@@ -2,6 +2,7 @@ package config
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -12,7 +13,6 @@ func InitDatabaseConnection() (db *sql.DB, err error) {
 
 	InitLoadConfiguration()
 	host := viper.GetString("postgres.host")
-	port := viper.GetString("postgres.port")
 	user := viper.GetString("postgres.user")
 	password := viper.GetString("postgres.password")
 	dbname := viper.GetString("postgres.dbname")
@@ -21,7 +21,7 @@ func InitDatabaseConnection() (db *sql.DB, err error) {
 	maxIdleConn := viper.GetInt("database.maxIdleConn")
 	maxOpenConn := viper.GetInt("database.maxOpenConn")
 
-	connString := "host=" + host + " port=" + port + " user=" + user + " password=" + password + " dbname=" + dbname + " sslmode=disable"
+	connString := fmt.Sprintf("user=%s password=%s host=%s dbname=%s", user, password, host, dbname)
 	db, err = sql.Open("postgres", connString)
 	if err != nil {
 		return

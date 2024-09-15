@@ -4,9 +4,9 @@
       "port": 8000
     },
     "postgres": {
-      "host": "localhost",
-      "user": "postgres",
-      "password": "postgres",
+      "host": "ep-white-dawn-a20ririb.eu-central-1.pg.koyeb.app",
+      "user": "koyeb-adm",
+      "password": "6ys2XJomlkDc",
       "dbname": "gosnap",
       "port": 5432
     },
